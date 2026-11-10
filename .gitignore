@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env
+.env.local
+*.exe
+backend/server
+backend/app
+.DS_Store
