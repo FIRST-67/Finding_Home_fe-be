@@ -4,14 +4,19 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"os"
 
 	"finding-home/internal/config"
 	"finding-home/internal/db"
 	"finding-home/internal/handlers"
 	"finding-home/internal/middleware"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found, using system environment variables")
+	}
 	cfg := config.Load()
 
 	if cfg.DatabaseURL == "" {
@@ -24,6 +29,11 @@ func main() {
 	defer pool.Close()
 
 	breeds := handlers.NewBreedsHandler(cfg.DogAPIKey)
+	secret := os.Getenv("JWT_SECRET")
+	if len(secret) < 32 {
+		log.Fatal("JWT_SECRET must be at least 32 characters")
+	}
+	auth := handlers.NewAuthHandler(pool, secret)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/health", handlers.Health)
@@ -31,7 +41,11 @@ func main() {
 	mux.HandleFunc("GET /api/breeds", breeds.List)
 	mux.HandleFunc("GET /api/breeds/search", breeds.Search)
 
-	// TODO (แยก branch): auth, dogs CRUD, adoption requests, favorites
+	mux.HandleFunc("POST /api/auth/register", auth.Register)
+	mux.HandleFunc("POST /api/auth/login", auth.Login)
+	mux.HandleFunc("GET /api/auth/me", middleware.RequireAuth([]byte(secret), auth.Me))
+	mux.HandleFunc("POST /api/auth/logout", middleware.RequireAuth([]byte(secret), auth.Logout))
+	// TODO: dogs CRUD, adoption requests, favorites
 
 	addr := ":" + cfg.Port
 	log.Printf("server listening on %s", addr)
