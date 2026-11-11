@@ -66,7 +66,22 @@ func main() {
 		middleware.RequireAuth([]byte(secret),
 			middleware.RequireRole("admin", dogs.Delete)))
 
-	// TODO: dogs CRUD, adoption requests, favorites
+	adoption := &handlers.AdoptionRequestsHandler{DB: pool}
+	memberOnly := func(next http.HandlerFunc) http.HandlerFunc {
+		return middleware.RequireAuth([]byte(secret), middleware.RequireRole("member", next))
+	}
+	adminOnly := func(next http.HandlerFunc) http.HandlerFunc {
+		return middleware.RequireAuth([]byte(secret), middleware.RequireRole("admin", next))
+	}
+	mux.HandleFunc("POST /api/adoption-requests", memberOnly(adoption.Create))
+	mux.HandleFunc("GET /api/adoption-requests/me", memberOnly(adoption.ListMine))
+	mux.HandleFunc("DELETE /api/adoption-requests/{id}", memberOnly(adoption.Cancel))
+	mux.HandleFunc("GET /api/adoption-requests", adminOnly(adoption.List))
+	mux.HandleFunc("PATCH /api/adoption-requests/{id}", adminOnly(adoption.Review))
+	favorites := &handlers.FavoritesHandler{DB: pool}
+	mux.HandleFunc("GET /api/favorites", memberOnly(favorites.List))
+	mux.HandleFunc("POST /api/favorites", memberOnly(favorites.Create))
+	mux.HandleFunc("DELETE /api/favorites/{dog_id}", memberOnly(favorites.Delete))
 
 	addr := ":" + cfg.Port
 	log.Printf("server listening on %s", addr)
