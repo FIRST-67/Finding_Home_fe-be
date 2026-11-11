@@ -8,6 +8,7 @@ body { margin: 0; font-family: system-ui, sans-serif; color: #45342d; background
 .site-header nav a { font-size: .92rem; font-weight: 650; }
 .site-header nav a.active { color: #c76e3d; }
 .site-header nav .nav-register { padding: 9px 14px; border-radius: 999px; background: #c76e3d; color: white; }
+.site-header nav a.nav-register.active { color: white; }
 .nav-button { border: 0; padding: 8px 0; background: none; color: #7a422d; font: inherit; font-size: .92rem; font-weight: 650; cursor: pointer; }
 main { max-width: 1100px; margin: 0 auto; padding: 28px 24px; }
 .search { display: flex; gap: 8px; margin-bottom: 24px; }
