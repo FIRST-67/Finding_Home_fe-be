@@ -35,6 +35,7 @@ func (a *AuthHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	u.CreatedAt = u.CreatedAt.UTC()
 	writeJSON(w, 200, u)
 }
 
@@ -57,7 +58,11 @@ func (a *AuthHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	in.Name = strings.TrimSpace(in.Name)
 	in.Phone = strings.TrimSpace(in.Phone)
 
-	if n := utf8.RuneCountInString(in.Name); n < 1 || n > 50 {
+	if in.Name == "" {
+		writeError(w, http.StatusBadRequest, "name is required")
+		return
+	}
+	if utf8.RuneCountInString(in.Name) > 50 {
 		writeError(w, 400, "name must be 1-50 characters")
 		return
 	}
@@ -83,6 +88,7 @@ func (a *AuthHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	u.CreatedAt = u.CreatedAt.UTC()
 	writeJSON(w, 200, u)
 }
 
@@ -102,8 +108,12 @@ func (a *AuthHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(in.NewPassword) < 8 || len([]byte(in.NewPassword)) > 72 {
-		writeError(w, 400, "new password must be 8-72 bytes")
+	if utf8.RuneCountInString(in.NewPassword) < 8 {
+		writeError(w, http.StatusBadRequest, "new password must be at least 8 characters")
+		return
+	}
+	if len(in.NewPassword) > 72 {
+		writeError(w, 400, "new password must be at most 72 bytes")
 		return
 	}
 
@@ -126,7 +136,7 @@ func (a *AuthHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 		[]byte(currentHash),
 		[]byte(in.CurrentPassword),
 	) != nil {
-		writeError(w, 400, "current password is incorrect")
+		writeError(w, http.StatusUnauthorized, "current password is incorrect")
 		return
 	}
 
@@ -139,15 +149,15 @@ func (a *AuthHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	result, err := a.DB.Exec(r.Context(),
-		`UPDATE users SET password_hash=$1 WHERE id=$2`,
-		string(newHash), identity.ID,
+		`UPDATE users SET password_hash=$1 WHERE id=$2 AND password_hash=$3`,
+		string(newHash), identity.ID, currentHash,
 	)
 	if err != nil {
 		writeError(w, 500, "internal server error")
 		return
 	}
 	if result.RowsAffected() == 0 {
-		writeError(w, 401, "unauthorized")
+		writeError(w, http.StatusUnauthorized, "current password is incorrect")
 		return
 	}
 
