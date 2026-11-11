@@ -50,3 +50,28 @@ func RequireAuth(secret []byte, next http.HandlerFunc) http.HandlerFunc {
 		next(w, r.WithContext(context.WithValue(r.Context(), authKey{}, Identity{ID: int64(idFloat), Role: role})))
 	}
 }
+
+func RequireRole(role string, next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		identity, ok := IdentityFrom(r.Context())
+		if !ok {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusUnauthorized)
+			_ = json.NewEncoder(w).Encode(
+				map[string]string{"error": "unauthorized"},
+			)
+			return
+		}
+
+		if identity.Role != role {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusForbidden)
+			_ = json.NewEncoder(w).Encode(
+				map[string]string{"error": "forbidden"},
+			)
+			return
+		}
+
+		next(w, r)
+	}
+}

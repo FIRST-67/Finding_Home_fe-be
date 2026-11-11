@@ -34,6 +34,7 @@ func main() {
 		log.Fatal("JWT_SECRET must be at least 32 characters")
 	}
 	auth := handlers.NewAuthHandler(pool, secret)
+	dogs := handlers.NewDogsHandler(pool)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/health", handlers.Health)
@@ -49,6 +50,22 @@ func main() {
 	mux.HandleFunc("GET /api/profile", middleware.RequireAuth([]byte(secret), auth.GetProfile))
 	mux.HandleFunc("PUT /api/profile", middleware.RequireAuth([]byte(secret), auth.UpdateProfile))
 	mux.HandleFunc("PUT /api/profile/password", middleware.RequireAuth([]byte(secret), auth.ChangePassword))
+
+	mux.HandleFunc("GET /api/dogs", dogs.List)
+	mux.HandleFunc("GET /api/dogs/{id}", dogs.Get)
+
+	mux.HandleFunc("POST /api/dogs",
+		middleware.RequireAuth([]byte(secret),
+			middleware.RequireRole("admin", dogs.Create)))
+
+	mux.HandleFunc("PUT /api/dogs/{id}",
+		middleware.RequireAuth([]byte(secret),
+			middleware.RequireRole("admin", dogs.Update)))
+
+	mux.HandleFunc("DELETE /api/dogs/{id}",
+		middleware.RequireAuth([]byte(secret),
+			middleware.RequireRole("admin", dogs.Delete)))
+
 	// TODO: dogs CRUD, adoption requests, favorites
 
 	addr := ":" + cfg.Port
