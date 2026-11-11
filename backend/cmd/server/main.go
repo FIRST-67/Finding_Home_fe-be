@@ -45,6 +45,10 @@ func main() {
 	mux.HandleFunc("POST /api/auth/login", auth.Login)
 	mux.HandleFunc("GET /api/auth/me", middleware.RequireAuth([]byte(secret), auth.Me))
 	mux.HandleFunc("POST /api/auth/logout", middleware.RequireAuth([]byte(secret), auth.Logout))
+
+	mux.HandleFunc("GET /api/profile", middleware.RequireAuth([]byte(secret), auth.GetProfile))
+	mux.HandleFunc("PUT /api/profile", middleware.RequireAuth([]byte(secret), auth.UpdateProfile))
+	mux.HandleFunc("PUT /api/profile/password", middleware.RequireAuth([]byte(secret), auth.ChangePassword))
 	// TODO: dogs CRUD, adoption requests, favorites
 
 	addr := ":" + cfg.Port
