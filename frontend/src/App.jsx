@@ -1,17 +1,12 @@
-import { Routes, Route, Link } from 'react-router-dom'
-import HomePage from './pages/HomePage'
+import Navbar from './components/Navbar'
+import AppRoutes from './routes/AppRoutes'
 
 export default function App() {
   return (
     <>
-      <header>
-        <Link to="/">Finding Home</Link>
-      </header>
+      <Navbar />
       <main>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          {/* TODO (แยก branch): /login /register /profile /dogs/:id /admin */}
-        </Routes>
+        <AppRoutes />
       </main>
     </>
   )
