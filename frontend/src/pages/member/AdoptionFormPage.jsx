@@ -6,20 +6,20 @@ import { createAdoptionRequest } from '../../services/requests'
 export default function AdoptionFormPage() {
   const { dogId } = useParams()
   const navigate = useNavigate()
-  const [values, setValues] = useState({ message: '', phone: '', address: '' })
+  const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
   async function handleSubmit(event) {
     event.preventDefault()
-    if (!values.message.trim() || !values.phone.trim() || !values.address.trim()) {
-      setError('กรุณากรอกข้อมูลให้ครบทุกช่อง')
+    if (!message.trim()) {
+      setError('กรุณากรอกข้อความถึงผู้ดูแล')
       return
     }
     setSubmitting(true)
     setError('')
     try {
-      await createAdoptionRequest({ dogId, ...values })
+      await createAdoptionRequest({ dog_id: Number(dogId), message })
       navigate('/my-requests', { replace: true })
     } catch (submitError) {
       setError(submitError.message)
@@ -37,15 +37,7 @@ export default function AdoptionFormPage() {
       <form className="form-stack" onSubmit={handleSubmit}>
         <label>
           ข้อความถึงผู้ดูแล
-          <textarea rows="4" value={values.message} onChange={(e) => setValues({ ...values, message: e.target.value })} />
-        </label>
-        <label>
-          เบอร์โทรศัพท์
-          <input type="tel" value={values.phone} onChange={(e) => setValues({ ...values, phone: e.target.value })} />
-        </label>
-        <label>
-          ที่อยู่
-          <textarea rows="3" value={values.address} onChange={(e) => setValues({ ...values, address: e.target.value })} />
+          <textarea rows="4" value={message} onChange={(e) => setMessage(e.target.value)} required />
         </label>
         <button type="submit" disabled={submitting}>{submitting ? 'กำลังส่งคำขอ...' : 'ส่งคำขอ'}</button>
       </form>

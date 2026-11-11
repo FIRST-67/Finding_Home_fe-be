@@ -7,12 +7,12 @@ describe('DogCard', () => {
     render(
       <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <DogCard dog={{
-          id: 'dog-1',
+          id: 1,
           name: 'มะลิ',
-          breed: 'ไทยผสม',
-          age: '2 ปี',
+          breed_name: 'ไทยผสม',
+          age_years: 2,
           description: 'เป็นมิตร',
-          image_url: null,
+          image_url: '',
         }} />
       </MemoryRouter>,
     )
@@ -26,7 +26,7 @@ describe('DogCard', () => {
   it('แสดงรูปสุนัขแบบ lazy และ fallback เมื่อรูปโหลดไม่ได้', () => {
     render(
       <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-        <DogCard dog={{ id: 'dog-2', name: 'ถุงทอง', image_url: '/broken.jpg' }} />
+        <DogCard dog={{ id: 2, name: 'ถุงทอง', image_url: '/broken.jpg' }} />
       </MemoryRouter>,
     )
     const image = screen.getByRole('img', { name: 'ถุงทอง' })

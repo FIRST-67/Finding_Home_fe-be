@@ -23,26 +23,26 @@ describe('HomePage', () => {
     renderHome()
 
     expect(screen.getByText('กำลังค้นหาน้องหมา...')).toBeInTheDocument()
-    resolveDogs([{
-      id: 'dog-1',
+    resolveDogs({ data: [{
+      id: 1,
       name: 'มะลิ',
-      breed: 'ไทยผสม',
-      age: '2 ปี',
+      breed_name: 'ไทยผสม',
+      age_years: 2,
       description: 'ขี้เล่น',
       status: 'available',
-    }])
+    }], page: 1, limit: 12, total: 1 })
     expect(await screen.findByText('มะลิ')).toBeInTheDocument()
   })
 
   it('แสดง empty state เมื่อไม่มีสุนัขตรงกับตัวกรอง', async () => {
-    getDogs.mockResolvedValue([])
+    getDogs.mockResolvedValue({ data: [], page: 1, limit: 12, total: 0 })
     renderHome()
     expect(await screen.findByText(/ยังไม่มีน้องหมา/)).toBeInTheDocument()
   })
 
   it('แสดง error และลองโหลดซ้ำได้', async () => {
     getDogs.mockRejectedValueOnce(new Error('เซิร์ฟเวอร์ไม่พร้อม'))
-    getDogs.mockResolvedValueOnce([])
+    getDogs.mockResolvedValueOnce({ data: [], page: 1, limit: 12, total: 0 })
     renderHome()
 
     expect(await screen.findByRole('alert')).toHaveTextContent('เซิร์ฟเวอร์ไม่พร้อม')
@@ -52,20 +52,16 @@ describe('HomePage', () => {
   })
 
   it('ส่งค่าค้นหาและตัวกรองไปยัง service', async () => {
-    getDogs.mockResolvedValue([])
+    getDogs.mockResolvedValue({ data: [], page: 1, limit: 12, total: 0 })
     renderHome()
     await screen.findByText(/ยังไม่มีน้องหมา/)
 
-    fireEvent.change(screen.getByLabelText('ค้นหาชื่อหรือสายพันธุ์'), { target: { value: 'มะลิ' } })
-    fireEvent.change(screen.getByLabelText('ขนาด'), { target: { value: 'small' } })
+    fireEvent.change(screen.getByLabelText('ค้นหาชื่อสุนัข'), { target: { value: 'มะลิ' } })
     fireEvent.change(screen.getByLabelText('เพศ'), { target: { value: 'female' } })
     fireEvent.click(screen.getByRole('button', { name: 'ค้นหา' }))
 
     await waitFor(() => expect(getDogs).toHaveBeenLastCalledWith({
       q: 'มะลิ',
-      breed: '',
-      size: 'small',
-      age: '',
       gender: 'female',
       status: 'available',
     }))

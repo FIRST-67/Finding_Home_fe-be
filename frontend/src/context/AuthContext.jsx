@@ -1,9 +1,10 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { getCurrentUser, logout as logoutRequest } from '../services/auth'
 import { setUnauthorizedHandler } from '../services/api'
 
 const AuthContext = createContext(null)
-const TOKEN_KEY = 'finding-home-token'
+const TOKEN_KEY = 'token'
 const USER_KEY = 'finding-home-user'
 
 function readStoredUser() {
@@ -44,6 +45,7 @@ export function AuthProvider({ children }) {
   }, [])
 
   const logout = useCallback(() => {
+    logoutRequest().catch((error) => console.error('เรียก logout API ไม่สำเร็จ:', error))
     clearSession()
     navigate('/', { replace: true })
   }, [clearSession, navigate])
@@ -53,6 +55,22 @@ export function AuthProvider({ children }) {
     clearSession()
     navigate('/login', { replace: true, state: { from: returnTo } })
   }), [clearSession, location.pathname, location.search, navigate])
+
+  useEffect(() => {
+    if (!token) return undefined
+    let active = true
+    Promise.resolve()
+      .then(() => getCurrentUser())
+      .then((currentUser) => {
+        if (!active) return
+        localStorage.setItem(USER_KEY, JSON.stringify(currentUser))
+        setUser(currentUser)
+      })
+      .catch((error) => {
+        if (error.status !== 401) console.error('ตรวจสอบ session ไม่สำเร็จ:', error)
+      })
+    return () => { active = false }
+  }, [token])
 
   const value = useMemo(() => ({
     token,

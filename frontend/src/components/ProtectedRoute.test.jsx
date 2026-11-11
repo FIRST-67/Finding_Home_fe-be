@@ -1,7 +1,12 @@
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { vi } from 'vitest'
 import { AuthProvider } from '../context/AuthContext'
 import ProtectedRoute from './ProtectedRoute'
+
+vi.mock('../services/auth', () => ({
+  getCurrentUser: vi.fn(() => new Promise(() => {})),
+}))
 
 function renderProtected(path, requireRole) {
   return render(
@@ -29,14 +34,14 @@ describe('ProtectedRoute', () => {
   })
 
   it('redirects members away from Admin routes', () => {
-    localStorage.setItem('finding-home-token', 'member-token')
+    localStorage.setItem('token', 'member-token')
     localStorage.setItem('finding-home-user', JSON.stringify({ id: 'u1', role: 'member' }))
     renderProtected('/protected', 'admin')
     expect(screen.getByText('Home destination')).toBeInTheDocument()
   })
 
   it('renders the route for a user with the required role', () => {
-    localStorage.setItem('finding-home-token', 'member-token')
+    localStorage.setItem('token', 'member-token')
     localStorage.setItem('finding-home-user', JSON.stringify({ id: 'u1', role: 'member' }))
     renderProtected('/protected', 'member')
     expect(screen.getByText('Protected content')).toBeInTheDocument()

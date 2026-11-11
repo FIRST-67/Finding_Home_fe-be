@@ -7,7 +7,7 @@ import { getDogs } from '../services/dogs'
 
 export default function HomePage() {
   const [dogs, setDogs] = useState([])
-  const [filters, setFilters] = useState({ q: '', breed: '', size: '', age: '', gender: '' })
+  const [filters, setFilters] = useState({ q: '', gender: '' })
   const [appliedFilters, setAppliedFilters] = useState({ status: 'available' })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -17,7 +17,7 @@ export default function HomePage() {
     setError('')
     try {
       const data = await getDogs(nextFilters)
-      setDogs(data)
+      setDogs(data.data)
     } catch (err) {
       setError(err.message || 'โหลดรายการสุนัขไม่สำเร็จ')
       setDogs([])
@@ -34,9 +34,6 @@ export default function HomePage() {
     e.preventDefault()
     setAppliedFilters({
       q: filters.q.trim(),
-      breed: filters.breed.trim(),
-      size: filters.size,
-      age: filters.age.trim(),
       gender: filters.gender,
       status: 'available',
     })
@@ -53,35 +50,9 @@ export default function HomePage() {
         <input
           value={filters.q}
           onChange={(e) => setFilters({ ...filters, q: e.target.value })}
-          placeholder="ค้นหาชื่อหรือสายพันธุ์"
-          aria-label="ค้นหาชื่อหรือสายพันธุ์"
+          placeholder="ค้นหาชื่อสุนัข"
+          aria-label="ค้นหาชื่อสุนัข"
         />
-        <input
-          value={filters.breed}
-          onChange={(e) => setFilters({ ...filters, breed: e.target.value })}
-          placeholder="สายพันธุ์"
-          aria-label="สายพันธุ์"
-        />
-        <select
-          value={filters.size}
-          onChange={(e) => setFilters({ ...filters, size: e.target.value })}
-          aria-label="ขนาด"
-        >
-          <option value="">ทุกขนาด</option>
-          <option value="small">เล็ก</option>
-          <option value="medium">กลาง</option>
-          <option value="large">ใหญ่</option>
-        </select>
-        <select
-          value={filters.age}
-          onChange={(e) => setFilters({ ...filters, age: e.target.value })}
-          aria-label="ช่วงอายุ"
-        >
-          <option value="">ทุกช่วงอายุ</option>
-          <option value="เด็ก">ลูกสุนัข</option>
-          <option value="ปี">โตเต็มวัย</option>
-          <option value="สูงวัย">สูงวัย</option>
-        </select>
         <select
           value={filters.gender}
           onChange={(e) => setFilters({ ...filters, gender: e.target.value })}

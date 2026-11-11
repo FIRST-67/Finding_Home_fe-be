@@ -4,18 +4,17 @@ import Loading from '../components/Loading'
 import { useAuth } from '../context/AuthContext'
 import { changePassword, getProfile, updateProfile } from '../services/auth'
 import EmptyState from '../components/EmptyState'
-import { validateEmail, validatePassword, validatePasswordConfirmation } from '../utils/validators'
+import { validatePassword, validatePasswordConfirmation } from '../utils/validators'
 
 export default function ProfilePage() {
   const { user, updateUser } = useAuth()
   const [profile, setProfile] = useState(user)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [emailError, setEmailError] = useState('')
   const [message, setMessage] = useState('')
   const [profileBusy, setProfileBusy] = useState(false)
   const [passwordBusy, setPasswordBusy] = useState(false)
-  const [passwordValues, setPasswordValues] = useState({ oldPassword: '', newPassword: '', confirmPassword: '' })
+  const [passwordValues, setPasswordValues] = useState({ current_password: '', new_password: '', confirmPassword: '' })
   const [passwordError, setPasswordError] = useState('')
 
   const load = useCallback(async () => {
@@ -36,17 +35,11 @@ export default function ProfilePage() {
 
   async function saveProfile(event) {
     event.preventDefault()
-    const invalidEmail = validateEmail(profile.email || '')
-    if (invalidEmail) {
-      setEmailError(invalidEmail)
-      return
-    }
     setProfileBusy(true)
     setError('')
-    setEmailError('')
     setMessage('')
     try {
-      const updated = await updateProfile({ name: profile.name, email: profile.email })
+      const updated = await updateProfile({ name: profile.name, phone: profile.phone || '' })
       setProfile(updated)
       updateUser(updated)
       setMessage('บันทึกข้อมูลโปรไฟล์แล้ว')
@@ -59,8 +52,8 @@ export default function ProfilePage() {
 
   async function savePassword(event) {
     event.preventDefault()
-    const validation = validatePassword(passwordValues.newPassword)
-      || validatePasswordConfirmation(passwordValues.newPassword, passwordValues.confirmPassword)
+    const validation = validatePassword(passwordValues.new_password)
+      || validatePasswordConfirmation(passwordValues.new_password, passwordValues.confirmPassword)
     if (validation) {
       setPasswordError(validation)
       return
@@ -70,10 +63,10 @@ export default function ProfilePage() {
     setMessage('')
     try {
       await changePassword({
-        oldPassword: passwordValues.oldPassword,
-        newPassword: passwordValues.newPassword,
+        current_password: passwordValues.current_password,
+        new_password: passwordValues.new_password,
       })
-      setPasswordValues({ oldPassword: '', newPassword: '', confirmPassword: '' })
+      setPasswordValues({ current_password: '', new_password: '', confirmPassword: '' })
       setMessage('เปลี่ยนรหัสผ่านสำเร็จ')
     } catch (changeError) {
       setPasswordError(changeError.message)
@@ -94,18 +87,14 @@ export default function ProfilePage() {
       <form className="form-stack form-panel" onSubmit={saveProfile} noValidate>
         <h2>ข้อมูลส่วนตัว</h2>
         <label>ชื่อ<input value={profile.name || ''} onChange={(e) => setProfile({ ...profile, name: e.target.value })} required /></label>
-        <label>อีเมล<input type="email" value={profile.email || ''} onChange={(e) => {
-          setProfile({ ...profile, email: e.target.value })
-          setEmailError('')
-        }} required />
-          {emailError && <span className="field-error">{emailError}</span>}
-        </label>
+        <label>เบอร์โทรศัพท์<input type="tel" value={profile.phone || ''} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} /></label>
+        <label>อีเมล<input type="email" value={profile.email || ''} readOnly /></label>
         <button type="submit" disabled={profileBusy}>{profileBusy ? 'กำลังบันทึก...' : 'บันทึกโปรไฟล์'}</button>
       </form>
       <form className="form-stack form-panel" onSubmit={savePassword}>
         <h2>เปลี่ยนรหัสผ่าน</h2>
-        <label>รหัสผ่านเดิม<input type="password" autoComplete="current-password" value={passwordValues.oldPassword} onChange={(e) => setPasswordValues({ ...passwordValues, oldPassword: e.target.value })} required /></label>
-        <label>รหัสผ่านใหม่<input type="password" autoComplete="new-password" value={passwordValues.newPassword} onChange={(e) => setPasswordValues({ ...passwordValues, newPassword: e.target.value })} required /></label>
+        <label>รหัสผ่านเดิม<input type="password" autoComplete="current-password" value={passwordValues.current_password} onChange={(e) => setPasswordValues({ ...passwordValues, current_password: e.target.value })} required /></label>
+        <label>รหัสผ่านใหม่<input type="password" autoComplete="new-password" value={passwordValues.new_password} onChange={(e) => setPasswordValues({ ...passwordValues, new_password: e.target.value })} required /></label>
         <label>ยืนยันรหัสผ่านใหม่<input type="password" autoComplete="new-password" value={passwordValues.confirmPassword} onChange={(e) => setPasswordValues({ ...passwordValues, confirmPassword: e.target.value })} required /></label>
         {passwordError && <p className="field-error" role="alert">{passwordError}</p>}
         <button type="submit" disabled={passwordBusy}>{passwordBusy ? 'กำลังเปลี่ยน...' : 'เปลี่ยนรหัสผ่าน'}</button>

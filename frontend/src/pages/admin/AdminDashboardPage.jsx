@@ -7,7 +7,7 @@ import { getDogs } from '../../services/dogs'
 import { getAllRequests } from '../../services/requests'
 
 export default function AdminDashboardPage() {
-  const [summary, setSummary] = useState({ dogs: [], requests: [] })
+  const [summary, setSummary] = useState({ dogCount: 0, pendingRequestCount: 0 })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -15,8 +15,15 @@ export default function AdminDashboardPage() {
     setLoading(true)
     setError('')
     try {
-      const [dogs, requests] = await Promise.all([getDogs(), getAllRequests()])
-      setSummary({ dogs, requests })
+      const [availableDogs, adoptedDogs, pendingRequests] = await Promise.all([
+        getDogs({ status: 'available', limit: 1 }),
+        getDogs({ status: 'adopted', limit: 1 }),
+        getAllRequests({ status: 'pending', limit: 1 }),
+      ])
+      setSummary({
+        dogCount: availableDogs.total + adoptedDogs.total,
+        pendingRequestCount: pendingRequests.total,
+      })
     } catch (loadError) {
       setError(loadError.message || 'โหลดข้อมูลภาพรวมไม่สำเร็จ')
     } finally {
@@ -37,10 +44,10 @@ export default function AdminDashboardPage() {
       {!loading && !error && (
         <>
           <div className="stats-grid">
-            <article className="stat-card"><span>สุนัขทั้งหมด</span><strong>{summary.dogs.length}</strong></article>
-            <article className="stat-card"><span>คำขอรอพิจารณา</span><strong>{summary.requests.filter((request) => request.status === 'pending').length}</strong></article>
+            <article className="stat-card"><span>สุนัขทั้งหมด</span><strong>{summary.dogCount}</strong></article>
+            <article className="stat-card"><span>คำขอรอพิจารณา</span><strong>{summary.pendingRequestCount}</strong></article>
           </div>
-          {!summary.dogs.length && !summary.requests.length && <EmptyState>ยังไม่มีข้อมูลสุนัขหรือคำขอรับเลี้ยง</EmptyState>}
+          {!summary.dogCount && !summary.pendingRequestCount && <EmptyState>ยังไม่มีข้อมูลสุนัขหรือคำขอรับเลี้ยง</EmptyState>}
           <div className="admin-links">
             <Link to="/admin/dogs">จัดการข้อมูลสุนัข</Link>
             <Link to="/admin/requests">พิจารณาคำขอรับเลี้ยง</Link>

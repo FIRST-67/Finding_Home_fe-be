@@ -15,7 +15,7 @@ export default function ManageRequestsPage() {
     setLoading(true)
     setError('')
     try {
-      setRequests(await getAllRequests())
+      setRequests((await getAllRequests()).data)
     } catch (loadError) {
       setRequests([])
       setError(loadError.message || 'โหลดคำขอรับเลี้ยงไม่สำเร็จ')
@@ -50,9 +50,9 @@ export default function ManageRequestsPage() {
           {requests.map((request) => (
             <article className="request-card request-card--admin" key={request.id}>
               <div>
-                <h2>{request.dog?.name || request.dogName || 'คำขอรับเลี้ยง'}</h2>
+                <h2>{request.dog_name || 'คำขอรับเลี้ยง'}</h2>
                 <p>{request.message}</p>
-                <p>โทร: {request.phone || '-'} · ที่อยู่: {request.address || '-'}</p>
+                <p>ผู้สมัคร: {request.user_name}</p>
                 <span className={`request-status request-status--${request.status}`}>{STATUS_LABEL[request.status] || request.status}</span>
               </div>
               {request.status === 'pending' && (

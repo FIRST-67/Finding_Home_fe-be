@@ -4,10 +4,18 @@ import ApiError from './ApiError'
 export { ApiError }
 
 const BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8080').replace(/\/+$/, '')
-const TOKEN_KEY = 'finding-home-token'
+const TOKEN_KEY = 'token'
 const USER_KEY = 'finding-home-user'
 
 export const isMockMode = import.meta.env.VITE_USE_MOCK === 'true'
+// Endpoints marked as pending in the API contract stay mocked until the backend implements them.
+const MOCK_ONLY_ENDPOINTS = [
+  '/api/auth',
+  '/api/profile',
+  '/api/dogs',
+  '/api/adoption-requests',
+  '/api/favorites',
+]
 
 let unauthorizedHandler
 
@@ -16,6 +24,13 @@ export function setUnauthorizedHandler(handler) {
   return () => {
     if (unauthorizedHandler === handler) unauthorizedHandler = undefined
   }
+}
+
+function shouldMockEndpoint(path) {
+  const endpoint = path.split('?')[0]
+  return isMockMode || MOCK_ONLY_ENDPOINTS.some(
+    (prefix) => endpoint === prefix || endpoint.startsWith(`${prefix}/`),
+  )
 }
 
 function getStoredToken() {
@@ -48,7 +63,7 @@ export async function request(path, options = {}) {
   }
   if (isFormData) requestHeaders.delete('Content-Type')
 
-  if (isMockMode) {
+  if (shouldMockEndpoint(path)) {
     try {
       return await mockRequest(path, { method, body, headers: requestHeaders })
     } catch (error) {
@@ -105,6 +120,7 @@ export async function request(path, options = {}) {
 export const apiGet = (path, options) => request(path, { ...options, method: 'GET' })
 export const apiPost = (path, body, options) => request(path, { ...options, method: 'POST', body })
 export const apiPut = (path, body, options) => request(path, { ...options, method: 'PUT', body })
+export const apiPatch = (path, body, options) => request(path, { ...options, method: 'PATCH', body })
 export const apiDelete = (path, options) => request(path, { ...options, method: 'DELETE' })
 
 export const checkHealth = () => apiGet('/api/health')

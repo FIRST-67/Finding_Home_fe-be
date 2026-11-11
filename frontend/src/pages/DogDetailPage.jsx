@@ -67,6 +67,9 @@ export default function DogDetailPage() {
   if (!dog) return <EmptyState>ไม่พบข้อมูลน้องหมา</EmptyState>
 
   const canAdopt = dog.status === 'available' && user?.role !== 'admin'
+  const age = Number(dog.age_years) < 1
+    ? `${Number(dog.age_years) * 12} เดือน`
+    : `${dog.age_years} ปี`
   return (
     <article className="dog-detail">
       <DogImage src={dog.image_url} alt={dog.name} loading="eager" />
@@ -74,10 +77,10 @@ export default function DogDetailPage() {
         <p className="eyebrow">กำลังมองหาบ้าน</p>
         <h1>{dog.name}</h1>
         <p className="dog-detail__facts">
-          {dog.breed || 'ไม่ทราบสายพันธุ์'} · {dog.age || 'ไม่ทราบอายุ'} · {dog.gender === 'female' ? 'เพศเมีย' : 'เพศผู้'}
+          {dog.breed_name || 'ไม่ทราบสายพันธุ์'} · {dog.age_years == null ? 'ไม่ทราบอายุ' : age} · {dog.gender === 'female' ? 'เพศเมีย' : 'เพศผู้'}
         </p>
         <p>{dog.description || 'ยังไม่มีรายละเอียดเพิ่มเติม'}</p>
-        <p>สถานะ: {dog.status === 'available' ? 'พร้อมหาบ้าน' : dog.status === 'pending' ? 'มีผู้สนใจแล้ว' : 'ได้บ้านแล้ว'}</p>
+        <p>สถานะ: {dog.status === 'available' ? 'พร้อมหาบ้าน' : 'ได้บ้านแล้ว'}</p>
         {actionError && <ErrorMessage message={actionError} />}
         <div className="button-row">
           {user?.role !== 'admin' && (

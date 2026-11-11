@@ -2,6 +2,9 @@
 body { margin: 0; font-family: system-ui, sans-serif; color: #45342d; background: #fffaf3; }
 .site-header { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 14px max(24px, calc((100% - 1100px) / 2)); border-bottom: 1px solid #f0dfcc; background: #fff; }
 .site-header a { color: inherit; text-decoration: none; }
+.brand-group { display: flex; align-items: center; gap: 18px; }
+.nav-back { border: 1px solid #e2cdb8; border-radius: 8px; padding: 8px 12px; background: white; color: #70452f; font: inherit; cursor: pointer; white-space: nowrap; }
+.nav-back:hover { background: #f7eee3; }
 .brand { display: flex; flex-direction: column; font-size: 1.25rem; font-weight: 800; color: #7a422d !important; }
 .brand span { margin-top: 2px; color: #967665; font-size: .75rem; font-weight: 500; }
 .site-header nav { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; }

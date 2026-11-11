@@ -11,27 +11,37 @@ describe.skipIf(isMockMode)('API client', () => {
     localStorage.clear()
   })
 
-  it('adds the bearer token and leaves FormData content type to the browser', async () => {
-    localStorage.setItem('finding-home-token', 'test-token')
+  it('adds the bearer token and serializes JSON requests', async () => {
+    localStorage.setItem('token', 'test-token')
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
-      text: async () => JSON.stringify({ image_url: '/dog.jpg' }),
+      text: async () => JSON.stringify({ id: 1 }),
     })
     vi.stubGlobal('fetch', fetchMock)
-    const formData = new FormData()
-    formData.append('image', new Blob(['image'], { type: 'image/jpeg' }), 'dog.jpg')
+    const body = { sample: true }
 
-    await apiPost('/api/dogs/1/image', formData)
+    await apiPost('/api/test', body)
 
     const [, options] = fetchMock.mock.calls[0]
     expect(options.headers.get('Authorization')).toBe('Bearer test-token')
-    expect(options.headers.has('Content-Type')).toBe(false)
-    expect(options.body).toBe(formData)
+    expect(options.headers.get('Content-Type')).toBe('application/json')
+    expect(options.body).toBe(JSON.stringify(body))
+  })
+
+  it('uses the contract mock for endpoints not implemented by the backend', async () => {
+    localStorage.setItem('token', 'mock-token-1')
+    const fetchMock = vi.fn()
+    vi.stubGlobal('fetch', fetchMock)
+
+    const user = await apiGet('/api/auth/me')
+
+    expect(user).toMatchObject({ id: 1, role: 'member' })
+    expect(fetchMock).not.toHaveBeenCalled()
   })
 
   it('clears saved auth and calls the unauthorized handler on 401', async () => {
-    localStorage.setItem('finding-home-token', 'expired-token')
+    localStorage.setItem('token', 'expired-token')
     localStorage.setItem('finding-home-user', JSON.stringify({ id: 'user-1' }))
     const onUnauthorized = vi.fn()
     const removeHandler = setUnauthorizedHandler(onUnauthorized)
@@ -41,8 +51,8 @@ describe.skipIf(isMockMode)('API client', () => {
       text: async () => JSON.stringify({ message: 'Session expired' }),
     }))
 
-    await expect(apiGet('/api/me')).rejects.toMatchObject({ message: 'Session expired', status: 401 })
-    expect(localStorage.getItem('finding-home-token')).toBeNull()
+    await expect(apiGet('/api/test')).rejects.toMatchObject({ message: 'Session expired', status: 401 })
+    expect(localStorage.getItem('token')).toBeNull()
     expect(localStorage.getItem('finding-home-user')).toBeNull()
     expect(onUnauthorized).toHaveBeenCalledOnce()
     removeHandler()

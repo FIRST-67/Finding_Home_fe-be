@@ -6,7 +6,7 @@ import { register } from '../services/auth'
 import { validateRegistration } from '../utils/validators'
 
 export default function RegisterPage() {
-  const [values, setValues] = useState({ name: '', email: '', password: '', confirmPassword: '' })
+  const [values, setValues] = useState({ name: '', email: '', phone: '', password: '', confirmPassword: '' })
   const [errors, setErrors] = useState({})
   const [serverError, setServerError] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -61,6 +61,10 @@ export default function RegisterPage() {
             onChange={(event) => update('email', event.target.value)}
           />
           {errors.email && <span className="field-error">{errors.email}</span>}
+        </label>
+        <label>
+          เบอร์โทรศัพท์ (ไม่บังคับ)
+          <input type="tel" value={values.phone} onChange={(event) => update('phone', event.target.value)} />
         </label>
         <label>
           รหัสผ่าน
