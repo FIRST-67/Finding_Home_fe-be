@@ -1,12 +1,12 @@
 * { box-sizing: border-box; }
 body { margin: 0; font-family: system-ui, sans-serif; color: var(--ink); background: var(--bg); }
 .site-header a { color: inherit; text-decoration: none; }
-.nav-back { border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; background: var(--surface); color: var(--ink); font: inherit; cursor: pointer; white-space: nowrap; }
+.nav-back { border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; background: var(--surface); color: var(--ink); font: inherit; cursor: var(--cursor-clickable, pointer); white-space: nowrap; }
 .nav-back:hover { background: var(--soft); }
 main { margin: 0 auto; }
 .search { display: flex; gap: 8px; margin-bottom: 24px; }
 .search input { flex: 1; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; }
-.search button { padding: 10px 16px; border: 0; border-radius: 8px; background: var(--accent); color: var(--surface); cursor: pointer; }
+.search button { padding: 10px 16px; border: 0; border-radius: 8px; background: var(--accent); color: var(--surface); cursor: var(--cursor-clickable, pointer); }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
 .card img { width: 100%; height: 180px; object-fit: cover; background: var(--soft); display: block; }
@@ -16,7 +16,7 @@ main { margin: 0 auto; }
 .status { padding: 32px; text-align: center; color: var(--muted); }
 .status.error { color: var(--warn); }
 .status p { margin: 0 0 12px; }
-.status button { border: 0; border-radius: 7px; padding: 9px 14px; background: var(--accent); color: var(--surface); font: inherit; cursor: pointer; }
+.status button { border: 0; border-radius: 7px; padding: 9px 14px; background: var(--accent); color: var(--surface); font: inherit; cursor: var(--cursor-clickable, pointer); }
 .grid { margin-top: 20px; }
 .dog-card { overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); box-shadow: 0 4px 14px color-mix(in srgb, var(--ink) 4%, transparent); }
 .dog-card__image-link { display: block; }
@@ -33,7 +33,7 @@ main { margin: 0 auto; }
 .eyebrow { margin: 0; color: var(--accent); font-size: .82rem; font-weight: 750; letter-spacing: .04em; }
 .search { display: grid; grid-template-columns: repeat(5, minmax(100px, 1fr)) auto; }
 .search input, .search select, .form-stack input, .form-stack select, .form-stack textarea { min-width: 0; width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); font: inherit; }
-.search button, .form-stack button, .button-row > button, .image-upload > button { border: 0; border-radius: 8px; padding: 10px 16px; background: var(--accent); color: var(--surface); font: inherit; font-weight: 650; cursor: pointer; }
+.search button, .form-stack button, .button-row > button, .image-upload > button { border: 0; border-radius: 8px; padding: 10px 16px; background: var(--accent); color: var(--surface); font: inherit; font-weight: 650; cursor: var(--cursor-clickable, pointer); }
 .search button:disabled, .form-stack button:disabled, .button-row button:disabled, .image-upload button:disabled { opacity: .6; cursor: not-allowed; }
 .form-page { max-width: 520px; margin: 24px auto; padding: clamp(22px, 5vw, 38px); border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
 .form-page--wide { max-width: 760px; }
@@ -59,7 +59,7 @@ main { margin: 0 auto; }
 .button-link { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border-radius: 8px; padding: 10px 16px; background: var(--accent); color: var(--surface); font-weight: 650; text-decoration: none; }
 .button-link--secondary { border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
 .button-link--small { padding: 7px 10px; font-size: .85rem; }
-.button-danger { border: 0; border-radius: 8px; padding: 8px 11px; background: var(--warn); color: var(--surface); font: inherit; cursor: pointer; }
+.button-danger { border: 0; border-radius: 8px; padding: 8px 11px; background: var(--warn); color: var(--surface); font: inherit; cursor: var(--cursor-clickable, pointer); }
 .dog-image-placeholder { display: grid; place-items: center; color: var(--accent2); font-size: 4rem; }
 .dog-image-placeholder svg { width: 64px; height: 64px; }
 .image-upload { display: grid; gap: 10px; justify-items: start; }
@@ -217,7 +217,7 @@ a { color: var(--terracotta); }
   border: 0;
   background: transparent;
   color: var(--ink);
-  cursor: pointer;
+  cursor: var(--cursor-clickable, pointer);
 }
 .theme-toggle {
   padding: 8px 11px;
@@ -387,7 +387,7 @@ main.page-container {
   color: var(--ink);
   font-size: 1.5rem;
   line-height: 1;
-  cursor: pointer;
+  cursor: var(--cursor-clickable, pointer);
 }
 .hero-carousel__arrow--previous { left: 10px; }
 .hero-carousel__arrow--next { right: 10px; }
@@ -407,7 +407,7 @@ main.page-container {
   border-radius: 999px;
   padding: 0;
   background: var(--line);
-  cursor: pointer;
+  cursor: var(--cursor-clickable, pointer);
 }
 .hero-carousel__dot.is-active { width: 20px; background: var(--accent); }
 .hero-carousel__play {
@@ -418,7 +418,7 @@ main.page-container {
   background: var(--surface);
   color: var(--ink);
   font-size: .68rem;
-  cursor: pointer;
+  cursor: var(--cursor-clickable, pointer);
 }
 .hero-carousel__play:disabled { opacity: .65; cursor: not-allowed; }
 .home-intro__skeleton {
@@ -512,7 +512,7 @@ main.page-container {
   padding: 7px 14px;
   background: var(--surface);
   color: var(--muted);
-  cursor: pointer;
+  cursor: var(--cursor-clickable, pointer);
 }
 .breed-filter button.is-selected { border-color: var(--button-color); background: var(--button-color); color: var(--surface); }
 
@@ -589,7 +589,7 @@ main.page-container {
   background: var(--surface);
   color: var(--terracotta);
   font-size: 1.2rem;
-  cursor: pointer;
+  cursor: var(--cursor-clickable, pointer);
 }
 .dog-card__favorite.is-favorite { color: var(--terracotta); }
 .dog-card__favorite:disabled { opacity: .65; cursor: wait; }
@@ -745,7 +745,7 @@ main.page-container {
 .profile-request-card h2 { margin: 5px 0; color: var(--brown); font-size: 1.1rem; }
 .profile-request-card p:last-child { margin: 0; color: var(--muted); font-size: .88rem; }
 .profile-request-card__actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
-.profile-logout { border: 0; background: transparent; color: var(--muted); font-size: .85rem; font-weight: 650; cursor: pointer; }
+.profile-logout { border: 0; background: transparent; color: var(--muted); font-size: .85rem; font-weight: 650; cursor: var(--cursor-clickable, pointer); }
 .success-message { border: 1px solid var(--beige); border-radius: 12px; background: var(--peach); color: var(--brown); }
 .request-status--approved, .request-status--rejected { background: var(--peach); color: var(--brown); }
 .button-danger { background: var(--button-color); }
@@ -917,4 +917,41 @@ th, td { border-bottom-color: var(--beige); }
   }
   .hero-carousel__slide--previous { opacity: 0; }
   .hero-carousel__slide--active.is-fading-in { opacity: 1; }
+}
+
+/* Keep native cursors on touch devices, editable fields, and drag controls. */
+@media (hover: hover) and (pointer: fine) {
+  :root {
+    --cursor-clickable: url('/paw-cursor.svg') 12 8, pointer;
+    cursor: url('/bone-cursor.svg') 9 6, auto;
+  }
+
+  :where(
+    a[href], button, select, summary,
+    input:is([type="button"], [type="submit"], [type="reset"], [type="checkbox"], [type="radio"], [type="file"], [type="color"], [type="date"], [type="time"]),
+    [role="button"], [role="link"], [role="menuitem"], [role="tab"], [role="switch"], [role="combobox"]
+  ):not(:disabled, [aria-disabled="true"]) {
+    cursor: var(--cursor-clickable, pointer);
+  }
+
+  input[type="file"]:enabled::file-selector-button {
+    cursor: var(--cursor-clickable, pointer);
+  }
+
+  :where(input:not([type]), input:is([type="text"], [type="search"], [type="email"], [type="password"], [type="tel"], [type="url"], [type="number"]), textarea, [contenteditable="true"]) {
+    cursor: text;
+  }
+
+  :is([draggable="true"], input[type="range"], [role="slider"]) {
+    cursor: grab;
+  }
+
+  :is([draggable="true"], input[type="range"], [role="slider"]):active {
+    cursor: grabbing;
+  }
+
+  :where(button, input, textarea, select, a[href], [role]):is(:disabled, [aria-disabled="true"]) {
+    --cursor-clickable: not-allowed;
+    cursor: not-allowed;
+  }
 }

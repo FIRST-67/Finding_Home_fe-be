@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <defs>
+    <path id="bone" d="M8 12.5h16a3.5 3.5 0 1 1 4 3.5 3.5 3.5 0 1 1-4 3.5H8A3.5 3.5 0 1 1 4 16a3.5 3.5 0 1 1 4-3.5Z"/>
+  </defs>
+  <g transform="rotate(45 16 16)" stroke-linejoin="round">
+    <use href="#bone" fill="#FFE1AD" stroke="#FFF7E9" stroke-width="4.5"/>
+    <use href="#bone" fill="#FFE1AD" stroke="#362015" stroke-width="2"/>
+  </g>
+</svg>
