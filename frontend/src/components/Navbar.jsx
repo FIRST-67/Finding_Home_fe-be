@@ -69,6 +69,9 @@ export default function Navbar() {
         >
           <NavLink to="/" end>หน้าแรก</NavLink>
           <NavLink to="/explore">ค้นหาน้องหมา</NavLink>
+          {isAuthenticated && user?.role === 'member' && (
+            <NavLink to="/favorites">รายการโปรด</NavLink>
+          )}
           {isAuthenticated && user?.role === 'admin' && (
             <NavLink to="/admin">จัดการระบบ</NavLink>
           )}

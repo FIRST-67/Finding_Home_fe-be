@@ -1,13 +1,22 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { vi } from 'vitest'
+import { useAuth } from '../context/AuthContext'
 import Navbar from './Navbar'
 
+const { mockUseAuth } = vi.hoisted(() => ({
+  mockUseAuth: vi.fn(() => ({ isAuthenticated: false, user: null, logout: vi.fn() })),
+}))
+
 vi.mock('../context/AuthContext', () => ({
-  useAuth: () => ({ isAuthenticated: false, user: null, logout: vi.fn() }),
+  useAuth: mockUseAuth,
 }))
 
 describe('Navbar', () => {
+  beforeEach(() => {
+    mockUseAuth.mockReturnValue({ isAuthenticated: false, user: null, logout: vi.fn() })
+  })
+
   it('shows the back button before the brand and falls back home on dog details', () => {
     render(
       <MemoryRouter
@@ -129,5 +138,41 @@ describe('Navbar', () => {
     fireEvent.click(screen.getByRole('button', { name: 'เปลี่ยนเป็นโหมดมืด' }))
     expect(document.documentElement).toHaveAttribute('data-theme', 'dark')
     expect(localStorage.getItem('finding-home-theme')).toBe('dark')
+  })
+
+  it('shows Favorites to signed-in members', () => {
+    mockUseAuth.mockReturnValue({
+      isAuthenticated: true,
+      user: { role: 'member' },
+      logout: vi.fn(),
+    })
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <Navbar />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByRole('link', { name: 'รายการโปรด' })).toHaveAttribute('href', '/favorites')
+  })
+
+  it('keeps logout as a consistently styled navigation control in both themes', () => {
+    document.documentElement.dataset.theme = 'light'
+    mockUseAuth.mockReturnValue({
+      isAuthenticated: true,
+      user: { role: 'member' },
+      logout: vi.fn(),
+    })
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <Navbar />
+      </MemoryRouter>,
+    )
+
+    const logoutButton = screen.getByRole('button', { name: 'ออกจากระบบ' })
+    expect(logoutButton).toHaveClass('nav-button')
+    fireEvent.click(screen.getByRole('button', { name: 'เปลี่ยนเป็นโหมดมืด' }))
+    expect(logoutButton).toHaveClass('nav-button')
+    fireEvent.click(screen.getByRole('button', { name: 'เปลี่ยนเป็นโหมดสว่าง' }))
+    expect(logoutButton).toHaveClass('nav-button')
   })
 })
