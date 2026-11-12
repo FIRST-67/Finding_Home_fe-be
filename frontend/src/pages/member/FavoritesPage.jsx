@@ -1,0 +1,65 @@
+import { useCallback, useEffect, useState } from 'react'
+import DogCard from '../../components/DogCard'
+import EmptyState from '../../components/EmptyState'
+import ErrorMessage from '../../components/ErrorMessage'
+import Loading from '../../components/Loading'
+import { getFavorites, removeFavorite } from '../../services/favorites'
+
+export default function FavoritesPage() {
+  const [dogs, setDogs] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [removingId, setRemovingId] = useState(null)
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    setError('')
+    try {
+      setDogs(await getFavorites())
+    } catch (loadError) {
+      setDogs([])
+      setError(loadError.message || 'โหลดรายการโปรดไม่สำเร็จ')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { load() }, [load])
+
+  async function toggleFavorite(dog) {
+    setRemovingId(dog.id)
+    setError('')
+    try {
+      await removeFavorite(dog.id)
+      setDogs((current) => current.filter((entry) => entry.id !== dog.id))
+    } catch (removeError) {
+      setError(removeError.message || 'นำออกจากรายการโปรดไม่สำเร็จ')
+    } finally {
+      setRemovingId(null)
+    }
+  }
+
+  return (
+    <section className="favorites-page">
+      <header className="page-intro">
+        <p className="eyebrow">เก็บไว้ในใจ</p>
+        <h1>น้องหมาที่คุณชื่นชอบ</h1>
+        <p>เพื่อนสี่ขาที่คุณสนใจและอยากทำความรู้จัก</p>
+      </header>
+      {loading && <Loading />}
+      {!loading && error && <ErrorMessage message={error} onRetry={load} />}
+      {!loading && !error && !dogs.length && <EmptyState>ยังไม่มีรายการโปรด ลองเลือกน้องหมาที่ถูกใจ</EmptyState>}
+      {!loading && !error && Boolean(dogs.length) && (
+        <div className="grid">{dogs.map((dog) => (
+          <DogCard
+            key={dog.id}
+            dog={dog}
+            isFavorite
+            onFavoriteToggle={toggleFavorite}
+            removing={removingId === dog.id}
+          />
+        ))}</div>
+      )}
+    </section>
+  )
+}
