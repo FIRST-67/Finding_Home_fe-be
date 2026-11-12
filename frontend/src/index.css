@@ -691,6 +691,7 @@ main.page-container {
 .status button { border-radius: 999px; background: var(--button-color); }
 .form-footnote { color: var(--muted); }
 .form-footnote a, .admin-links a { color: var(--terracotta); }
+.admin-links > .button-link { color: var(--surface); }
 .form-panel, .stat-card, .request-card, .table-scroll { border-color: var(--beige); border-radius: 16px; }
 .stat-card { background: var(--surface); color: var(--muted); }
 .stat-card strong { color: var(--brown); }

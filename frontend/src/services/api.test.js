@@ -29,15 +29,46 @@ describe.skipIf(isMockMode)('API client', () => {
     expect(options.body).toBe(JSON.stringify(body))
   })
 
-  it('uses the contract mock for endpoints not implemented by the backend', async () => {
-    localStorage.setItem('token', 'mock-token-1')
-    const fetchMock = vi.fn()
+  it('sends login requests to the backend and returns its session token', async () => {
+    const session = { token: 'signed-token', user: { id: 2, role: 'admin' } }
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: async () => JSON.stringify(session),
+    })
     vi.stubGlobal('fetch', fetchMock)
 
-    const user = await apiGet('/api/auth/me')
+    const result = await apiPost('/api/auth/login', {
+      email: 'admin@example.com',
+      password: 'password123',
+    })
 
-    expect(user).toMatchObject({ id: 1, role: 'member' })
-    expect(fetchMock).not.toHaveBeenCalled()
+    expect(result).toEqual(session)
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${(import.meta.env.VITE_API_URL || 'https://finding-home-dfe0.onrender.com').replace(/\/+$/, '')}/api/auth/login`,
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ email: 'admin@example.com', password: 'password123' }),
+      }),
+    )
+  })
+
+  it('sends dog creation to the backend with the saved session token', async () => {
+    localStorage.setItem('token', 'signed-token')
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 201,
+      text: async () => JSON.stringify({ id: 4 }),
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    await apiPost('/api/dogs', { name: 'Mochi' })
+
+    const [url, options] = fetchMock.mock.calls[0]
+    expect(url).toBe(
+      `${(import.meta.env.VITE_API_URL || 'https://finding-home-dfe0.onrender.com').replace(/\/+$/, '')}/api/dogs`,
+    )
+    expect(options.headers.get('Authorization')).toBe('Bearer signed-token')
   })
 
   it('loads dogs from the configured backend', async () => {

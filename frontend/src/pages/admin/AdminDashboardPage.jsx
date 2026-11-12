@@ -49,8 +49,8 @@ export default function AdminDashboardPage() {
           </div>
           {!summary.dogCount && !summary.pendingRequestCount && <EmptyState>ยังไม่มีข้อมูลสุนัขหรือคำขอรับเลี้ยง</EmptyState>}
           <div className="admin-links">
-            <Link to="/admin/dogs">จัดการข้อมูลสุนัข</Link>
-            <Link to="/admin/requests">พิจารณาคำขอรับเลี้ยง</Link>
+            <Link className="button-link" to="/admin/dogs">จัดการข้อมูลสุนัข</Link>
+            <Link className="button-link" to="/admin/requests">พิจารณาคำขอรับเลี้ยง</Link>
           </div>
         </>
       )}

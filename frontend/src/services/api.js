@@ -8,13 +8,6 @@ const TOKEN_KEY = 'token'
 const USER_KEY = 'finding-home-user'
 
 export const isMockMode = import.meta.env.VITE_USE_MOCK === 'true'
-// Endpoints marked as pending in the API contract stay mocked until the backend implements them.
-const MOCK_ONLY_ENDPOINTS = [
-  '/api/auth',
-  '/api/profile',
-  '/api/adoption-requests',
-  '/api/favorites',
-]
 
 let unauthorizedHandler
 
@@ -23,13 +16,6 @@ export function setUnauthorizedHandler(handler) {
   return () => {
     if (unauthorizedHandler === handler) unauthorizedHandler = undefined
   }
-}
-
-function shouldMockEndpoint(path) {
-  const endpoint = path.split('?')[0]
-  return isMockMode || MOCK_ONLY_ENDPOINTS.some(
-    (prefix) => endpoint === prefix || endpoint.startsWith(`${prefix}/`),
-  )
 }
 
 function getStoredToken() {
@@ -62,7 +48,7 @@ export async function request(path, options = {}) {
   }
   if (isFormData) requestHeaders.delete('Content-Type')
 
-  if (shouldMockEndpoint(path)) {
+  if (isMockMode) {
     try {
       return await mockRequest(path, { method, body, headers: requestHeaders })
     } catch (error) {
