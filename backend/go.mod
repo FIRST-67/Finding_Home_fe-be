@@ -7,6 +7,7 @@ require (
 	github.com/jackc/pgx/v5 v5.12.0
 	github.com/joho/godotenv v1.5.1
 	golang.org/x/crypto v0.58.0
+	golang.org/x/image v0.35.0
 )
 
 require (

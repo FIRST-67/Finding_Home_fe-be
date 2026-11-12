@@ -29,15 +29,39 @@ describe.skipIf(isMockMode)('API client', () => {
     expect(options.body).toBe(JSON.stringify(body))
   })
 
-  it('uses the contract mock for endpoints not implemented by the backend', async () => {
-    localStorage.setItem('token', 'mock-token-1')
-    const fetchMock = vi.fn()
+  it('gets the session from the backend in live mode', async () => {
+    localStorage.setItem('token', 'backend-test-token')
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: async () => JSON.stringify({ id: 2, role: 'admin' }),
+    })
     vi.stubGlobal('fetch', fetchMock)
 
-    const user = await apiGet('/api/auth/me')
+    await expect(apiGet('/api/auth/me')).resolves.toMatchObject({ id: 2, role: 'admin' })
+    const [url, options] = fetchMock.mock.calls[0]
+    expect(url).toMatch(/\/api\/auth\/me$/)
+    expect(options.headers.get('Authorization')).toBe('Bearer backend-test-token')
+  })
 
-    expect(user).toMatchObject({ id: 1, role: 'member' })
-    expect(fetchMock).not.toHaveBeenCalled()
+  it('sends the file as multipart with the existing bearer token', async () => {
+    localStorage.setItem('token', 'backend-test-token')
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 201,
+      text: async () => JSON.stringify({ image_url: 'https://storage.example/dog.jpg' }),
+    })
+    vi.stubGlobal('fetch', fetchMock)
+    const form = new FormData()
+    form.append('file', new File(['photo'], 'dog.jpg', { type: 'image/jpeg' }))
+
+    await apiPost('/api/uploads/dogs', form)
+
+    const [url, options] = fetchMock.mock.calls[0]
+    expect(url).toMatch(/\/api\/uploads\/dogs$/)
+    expect(options.headers.get('Authorization')).toBe('Bearer backend-test-token')
+    expect(options.headers.has('Content-Type')).toBe(false)
+    expect(options.body).toBe(form)
   })
 
   it('loads dogs from the configured backend', async () => {

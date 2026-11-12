@@ -16,3 +16,11 @@ export const updateDog = (dogId, dog) =>
   apiPut(`/api/dogs/${encodeURIComponent(dogId)}`, dog)
 export const deleteDog = (dogId) =>
   apiDelete(`/api/dogs/${encodeURIComponent(dogId)}`)
+
+export async function uploadDogImage(file) {
+  const form = new FormData()
+  form.append('file', file)
+  const response = await apiPost('/api/uploads/dogs', form)
+  if (!response?.image_url) throw new Error('เซิร์ฟเวอร์ไม่ส่งลิงก์รูปภาพกลับมา')
+  return response.image_url
+}

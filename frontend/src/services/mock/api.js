@@ -1,3 +1,4 @@
+import { validateImageFile } from '../../utils/validators'
 import ApiError from '../ApiError'
 import { mockAdoptionRequests, mockDogs, mockFavorites, mockUsers } from './data'
 
@@ -212,6 +213,20 @@ export async function mockRequest(path, { method = 'GET', body, headers }) {
       }
       return null
     }
+  }
+
+  if (route === '/api/uploads/dogs' && method === 'POST') {
+    requireAdmin(headers)
+    const file = body instanceof FormData ? body.get('file') : null
+    if (!(file instanceof File)) throw new ApiError('expected a file in the file field', 400)
+    const error = validateImageFile(file)
+    if (error) throw new ApiError(error, 400)
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve({ image_url: reader.result })
+      reader.onerror = () => reject(new ApiError('อ่านไฟล์รูปไม่สำเร็จ'))
+      reader.readAsDataURL(file)
+    })
   }
 
   if (route === '/api/dogs' && method === 'POST') {

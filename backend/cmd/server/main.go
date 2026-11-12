@@ -73,6 +73,9 @@ func main() {
 	adminOnly := func(next http.HandlerFunc) http.HandlerFunc {
 		return middleware.RequireAuth([]byte(secret), middleware.RequireRole("admin", next))
 	}
+	mux.HandleFunc("POST /api/uploads/dogs",
+		adminOnly(handlers.NewDogImageUpload(cfg.SupabaseURL, cfg.SupabaseServiceRoleKey)))
+
 	mux.HandleFunc("POST /api/adoption-requests", memberOnly(adoption.Create))
 	mux.HandleFunc("GET /api/adoption-requests/me", memberOnly(adoption.ListMine))
 	mux.HandleFunc("DELETE /api/adoption-requests/{id}", memberOnly(adoption.Cancel))

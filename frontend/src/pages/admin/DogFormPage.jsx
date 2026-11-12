@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import ErrorMessage from '../../components/ErrorMessage'
 import EmptyState from '../../components/EmptyState'
 import Loading from '../../components/Loading'
 import ImageUpload from '../../components/ImageUpload'
-import { createDog, getDog, updateDog } from '../../services/dogs'
+import { createDog, getDog, updateDog, uploadDogImage } from '../../services/dogs'
 
 const EMPTY_DOG = {
   name: '',
@@ -17,13 +17,13 @@ const EMPTY_DOG = {
   image_url: '',
 }
 
-function readImageFile(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(reader.result)
-    reader.onerror = () => reject(new Error('อ่านไฟล์รูปไม่สำเร็จ'))
-    reader.readAsDataURL(file)
-  })
+function uploadErrorMessage(error) {
+  if (error.status === 401) return 'เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่'
+  if (error.status === 403) return 'เฉพาะผู้ดูแลระบบที่อัปโหลดรูปได้'
+  if (error.status === 413) return 'รูปต้องมีขนาดไม่เกิน 2 MB และความละเอียดไม่เกิน 16 ล้านพิกเซล'
+  if (error.status === 415) return 'ไฟล์รูปไม่ถูกต้อง กรุณาเลือกไฟล์ JPG, PNG หรือ WEBP'
+  if (error.status === 429) return 'ระบบกำลังอัปโหลดหลายรูป กรุณาลองใหม่อีกครั้ง'
+  return 'อัปโหลดรูปไม่สำเร็จ กรุณาลองใหม่อีกครั้ง'
 }
 
 export default function DogFormPage() {
@@ -33,7 +33,10 @@ export default function DogFormPage() {
   const [values, setValues] = useState(EMPTY_DOG)
   const [loading, setLoading] = useState(isEditing)
   const [submitting, setSubmitting] = useState(false)
-  const [readingImage, setReadingImage] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [imageFile, setImageFile] = useState(null)
+  const uploadedImage = useRef(null)
+  const saving = useRef(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
@@ -51,28 +54,37 @@ export default function DogFormPage() {
     }
   }, [dogId])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => {
+    setImageFile(null)
+    uploadedImage.current = null
+    load()
+  }, [load])
 
-  async function handleImageChange(file) {
-    if (!file) return
-    setReadingImage(true)
+  function handleImageChange(file) {
+    setImageFile(file)
+    uploadedImage.current = null
     setError('')
-    try {
-      const image_url = await readImageFile(file)
-      setValues((current) => ({ ...current, image_url }))
-    } catch (imageError) {
-      setError(imageError.message)
-    } finally {
-      setReadingImage(false)
-    }
   }
 
   async function handleSubmit(event) {
     event.preventDefault()
+    if (saving.current) return
+    saving.current = true
     setSubmitting(true)
     setError('')
     setSuccess('')
     try {
+      if (imageFile && !uploadedImage.current) {
+        setUploading(true)
+        try {
+          uploadedImage.current = await uploadDogImage(imageFile)
+        } catch (uploadError) {
+          setError(uploadErrorMessage(uploadError))
+          return
+        } finally {
+          setUploading(false)
+        }
+      }
       const dog = {
         name: values.name,
         breed_id: values.breed_id === '' ? null : Number(values.breed_id),
@@ -80,7 +92,7 @@ export default function DogFormPage() {
         age_years: Number(values.age_years),
         gender: values.gender,
         description: values.description,
-        image_url: values.image_url,
+        image_url: uploadedImage.current ?? values.image_url,
       }
       if (isEditing) await updateDog(dogId, { ...dog, status: values.status })
       else await createDog(dog)
@@ -89,6 +101,7 @@ export default function DogFormPage() {
     } catch (saveError) {
       setError(saveError.message || 'บันทึกข้อมูลสุนัขไม่สำเร็จ')
     } finally {
+      saving.current = false
       setSubmitting(false)
     }
   }
@@ -123,10 +136,10 @@ export default function DogFormPage() {
           </label>}
         </div>
         <label>รายละเอียด<textarea rows="5" value={values.description} onChange={(e) => setValues({ ...values, description: e.target.value })} /></label>
-        <ImageUpload currentImage={values.image_url} onFileChange={handleImageChange} />
+        <ImageUpload key={dogId ?? 'new'} currentImage={values.image_url} onFileChange={handleImageChange} disabled={submitting} />
         <div className="button-row">
-          <button type="submit" disabled={submitting || readingImage}>
-            {readingImage ? 'กำลังอ่านรูป...' : submitting ? 'กำลังบันทึก...' : 'บันทึกสุนัข'}
+          <button type="submit" disabled={submitting}>
+            {uploading ? 'กำลังอัปโหลดรูป...' : submitting ? 'กำลังบันทึก...' : 'บันทึกสุนัข'}
           </button>
           <Link className="button-link button-link--secondary" to="/admin/dogs">ยกเลิก</Link>
         </div>

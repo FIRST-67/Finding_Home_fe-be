@@ -7,6 +7,7 @@ export default function ImageUpload({
   onFileChange,
   onUpload,
   uploading = false,
+  disabled = false,
   error = '',
   currentImage,
 }) {
@@ -28,6 +29,7 @@ export default function ImageUpload({
   function handleChange(event) {
     const nextFile = event.target.files?.[0] || null
     const message = nextFile ? validateImageFile(nextFile) : ''
+    event.target.setCustomValidity(message)
     setValidationError(message)
     const acceptedFile = message ? null : nextFile
     setFile(acceptedFile)
@@ -47,7 +49,7 @@ export default function ImageUpload({
       )}
       <label className="file-label">
         เลือกรูป JPG, PNG หรือ WEBP (ไม่เกิน 2MB)
-        <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleChange} />
+        <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleChange} disabled={disabled} />
       </label>
       {(validationError || error) && <p className="field-error" role="alert">{validationError || error}</p>}
       {onUpload && (
