@@ -5,9 +5,10 @@ import { useAuth } from '../context/AuthContext'
 import { changePassword, getProfile, updateProfile } from '../services/auth'
 import EmptyState from '../components/EmptyState'
 import { validatePassword, validatePasswordConfirmation } from '../utils/validators'
+import { Link } from 'react-router-dom'
 
 export default function ProfilePage() {
-  const { user, updateUser } = useAuth()
+  const { user, updateUser, logout } = useAuth()
   const [profile, setProfile] = useState(user)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -80,10 +81,25 @@ export default function ProfilePage() {
   if (!profile) return <EmptyState>ไม่พบข้อมูลโปรไฟล์</EmptyState>
 
   return (
-    <section>
-      <h1>โปรไฟล์ของฉัน</h1>
+    <section className="profile-page">
+      <header className="page-intro">
+        <p className="eyebrow">พื้นที่ของคุณ</p>
+        <h1>โปรไฟล์ของฉัน</h1>
+        <p>จัดการข้อมูลส่วนตัวและติดตามการเดินทางสู่บ้านหลังใหม่</p>
+      </header>
       {error && <ErrorMessage message={error} onRetry={load} />}
       {message && <p className="success-message" role="status">{message}</p>}
+      <section className="profile-request-card">
+        <div>
+          <p className="eyebrow">การรับเลี้ยงของฉัน</p>
+          <h2>ติดตามสถานะใบสมัคร</h2>
+          <p>ดูประวัติคำขอและข่าวคราวจากผู้ดูแล</p>
+        </div>
+        <div className="profile-request-card__actions">
+          <Link className="button-link button-link--secondary" to="/my-requests">ดูคำขอของฉัน <span aria-hidden="true">→</span></Link>
+          <button className="profile-logout" type="button" onClick={logout}>ออกจากระบบ</button>
+        </div>
+      </section>
       <form className="form-stack form-panel" onSubmit={saveProfile} noValidate>
         <h2>ข้อมูลส่วนตัว</h2>
         <label>ชื่อ<input value={profile.name || ''} onChange={(e) => setProfile({ ...profile, name: e.target.value })} required /></label>

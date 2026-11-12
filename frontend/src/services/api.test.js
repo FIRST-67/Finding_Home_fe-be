@@ -40,6 +40,22 @@ describe.skipIf(isMockMode)('API client', () => {
     expect(fetchMock).not.toHaveBeenCalled()
   })
 
+  it('loads dogs from the configured backend', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: async () => JSON.stringify({ data: [], page: 1, limit: 12, total: 0 }),
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    await apiGet('/api/dogs')
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${(import.meta.env.VITE_API_URL || 'https://finding-home-dfe0.onrender.com').replace(/\/+$/, '')}/api/dogs`,
+      expect.objectContaining({ method: 'GET' }),
+    )
+  })
+
   it('clears saved auth and calls the unauthorized handler on 401', async () => {
     localStorage.setItem('token', 'expired-token')
     localStorage.setItem('finding-home-user', JSON.stringify({ id: 'user-1' }))

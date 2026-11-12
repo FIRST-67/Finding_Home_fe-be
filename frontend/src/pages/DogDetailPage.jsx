@@ -70,28 +70,44 @@ export default function DogDetailPage() {
   const age = Number(dog.age_years) < 1
     ? `${Number(dog.age_years) * 12} เดือน`
     : `${dog.age_years} ปี`
+  const healthDetails = dog.health_status || dog.vaccination_status
+  const location = dog.location || dog.province
   return (
     <article className="dog-detail">
-      <DogImage src={dog.image_url} alt={dog.name} loading="eager" />
+      <DogImage src={dog.image_url} alt={dog.name} breed={dog.breed_name} loading="eager" />
       <div className="dog-detail__body">
-        <p className="eyebrow">กำลังมองหาบ้าน</p>
-        <h1>{dog.name}</h1>
+        <p className="eyebrow">ทำความรู้จักเพื่อนใหม่</p>
+        <div className="dog-detail__title">
+          <h1>{dog.name}</h1>
+          <span className="dog-card__status">{dog.status === 'available' ? 'พร้อมหาบ้าน' : 'ได้บ้านแล้ว'}</span>
+        </div>
         <p className="dog-detail__facts">
-          {dog.breed_name || 'ไม่ทราบสายพันธุ์'} · {dog.age_years == null ? 'ไม่ทราบอายุ' : age} · {dog.gender === 'female' ? 'เพศเมีย' : 'เพศผู้'}
+          {dog.breed_name || 'ไม่ทราบสายพันธุ์'} <span>·</span> {dog.age_years == null ? 'ไม่ทราบอายุ' : age} <span>·</span> {dog.gender === 'female' ? 'เพศเมีย' : 'เพศผู้'}
         </p>
-        <p>{dog.description || 'ยังไม่มีรายละเอียดเพิ่มเติม'}</p>
-        <p>สถานะ: {dog.status === 'available' ? 'พร้อมหาบ้าน' : 'ได้บ้านแล้ว'}</p>
+        {location && <p className="dog-detail__location">⌖ {location}</p>}
+        <section className="detail-panel">
+          <h2>นิสัยและการดูแล</h2>
+          <p>{dog.description || 'ศูนย์ช่วยเหลือยังไม่ได้เพิ่มรายละเอียดน้องหมา'}</p>
+        </section>
+        <section className="detail-panel">
+          <h2>สุขภาพและวัคซีน</h2>
+          <p>{healthDetails || 'ยังไม่มีข้อมูลสุขภาพและวัคซีน กรุณาสอบถามผู้ดูแลก่อนรับเลี้ยง'}</p>
+        </section>
+        <section className="detail-panel">
+          <h2>รายละเอียดการรับเลี้ยง</h2>
+          <p>{dog.status === 'available' ? 'น้องกำลังรอพบครอบครัวที่พร้อมดูแลระยะยาว' : 'น้องได้พบครอบครัวแล้ว'}</p>
+        </section>
         {actionError && <ErrorMessage message={actionError} />}
-        <div className="button-row">
+        <div className="button-row dog-detail__actions">
           {user?.role !== 'admin' && (
-            <button type="button" disabled={savingFavorite} onClick={toggleFavorite}>
+            <button className="button-link button-link--secondary" type="button" disabled={savingFavorite} onClick={toggleFavorite}>
               {savingFavorite ? 'กำลังบันทึก...' : favorite ? '♥ นำออกจากรายการโปรด' : '♡ เพิ่มในรายการโปรด'}
             </button>
           )}
           {canAdopt && (
             isAuthenticated
-              ? <Link className="button-link" to={`/dogs/${dogId}/adoption`}>ขอรับเลี้ยง</Link>
-              : <button type="button" onClick={() => navigate('/login', { state: { from: `/dogs/${dogId}/adoption` } })}>ขอรับเลี้ยง</button>
+              ? <Link className="button-link" to={`/dogs/${dogId}/adoption`}>รับเลี้ยงน้องคนนี้</Link>
+              : <button className="button-link" type="button" onClick={() => navigate('/login', { state: { from: `/dogs/${dogId}/adoption` } })}>รับเลี้ยงน้องคนนี้</button>
           )}
         </div>
       </div>

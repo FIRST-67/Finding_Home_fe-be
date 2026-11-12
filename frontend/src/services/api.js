@@ -3,7 +3,7 @@ import ApiError from './ApiError'
 
 export { ApiError }
 
-const BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8080').replace(/\/+$/, '')
+const BASE_URL = (import.meta.env.VITE_API_URL || 'https://finding-home-dfe0.onrender.com').replace(/\/+$/, '')
 const TOKEN_KEY = 'token'
 const USER_KEY = 'finding-home-user'
 
@@ -12,7 +12,6 @@ export const isMockMode = import.meta.env.VITE_USE_MOCK === 'true'
 const MOCK_ONLY_ENDPOINTS = [
   '/api/auth',
   '/api/profile',
-  '/api/dogs',
   '/api/adoption-requests',
   '/api/favorites',
 ]

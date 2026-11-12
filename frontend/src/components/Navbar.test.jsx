@@ -29,19 +29,38 @@ describe('Navbar', () => {
     expect(backButton.compareDocumentPosition(brand) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
 
     fireEvent.click(backButton)
-    expect(screen.getByText('หน้าแรก')).toBeInTheDocument()
+    expect(screen.getByText('หน้าแรก', { selector: 'p' })).toBeInTheDocument()
+  })
+
+  it('uses browser history when the current page has an in-app predecessor', () => {
+    render(
+      <MemoryRouter
+        initialEntries={['/', '/dogs/1']}
+        initialIndex={1}
+        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+      >
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<p>หน้าแรก</p>} />
+          <Route path="/dogs/:dogId" element={<p>รายละเอียดสุนัข</p>} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: '← ย้อนกลับ' }))
+    expect(screen.getByText('หน้าแรก', { selector: 'p' })).toBeInTheDocument()
   })
 
   it.each([
-    ['/dogs/1/adoption', '/dogs/1', 'รายละเอียดสุนัข'],
-    ['/admin/dogs/new', '/admin/dogs', 'จัดการสุนัข'],
-    ['/admin/dogs/5/edit', '/admin/dogs', 'จัดการสุนัข'],
-    ['/admin/dogs', '/admin', 'แดชบอร์ด'],
-    ['/admin/requests', '/admin', 'แดชบอร์ด'],
-    ['/profile', '/', 'หน้าแรก'],
-    ['/favorites', '/', 'หน้าแรก'],
-    ['/my-requests', '/', 'หน้าแรก'],
-  ])('returns from %s to its parent when directly opened', (path, target, targetText) => {
+    ['/dogs/1/adoption', 'แบบฟอร์มขอรับเลี้ยง'],
+    ['/admin/dogs/new', 'เพิ่มสุนัข'],
+    ['/admin/dogs/5/edit', 'แก้ไขสุนัข'],
+    ['/admin/dogs', 'จัดการสุนัข'],
+    ['/admin/requests', 'คำขอรับเลี้ยง'],
+    ['/profile', 'โปรไฟล์'],
+    ['/favorites', 'รายการโปรด'],
+    ['/my-requests', 'คำขอของฉัน'],
+  ])('returns from a directly opened %s page to home', (path, currentText) => {
     render(
       <MemoryRouter
         initialEntries={[path]}
@@ -65,22 +84,50 @@ describe('Navbar', () => {
     )
 
     fireEvent.click(screen.getByRole('button', { name: '← ย้อนกลับ' }))
-    expect(screen.getByText(targetText)).toBeInTheDocument()
+    expect(screen.getByText('หน้าแรก', { selector: 'p' })).toBeInTheDocument()
+    expect(screen.queryByText(currentText, { selector: 'p' })).not.toBeInTheDocument()
   })
 
-  it.each(['/', '/admin', '/login', '/register'])(
-    'does not show a redundant back button on primary page %s',
-    (path) => {
-      render(
-        <MemoryRouter
-          initialEntries={[path]}
-          future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-        >
-          <Navbar />
-        </MemoryRouter>,
-      )
+  it.each([
+    ['/', false],
+    ['/admin', true],
+    ['/login', true],
+    ['/register', true],
+  ])('shows the back button on %s according to the route requirement', (path, shouldShow) => {
+    render(
+      <MemoryRouter
+        initialEntries={[path]}
+        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+      >
+        <Navbar />
+      </MemoryRouter>,
+    )
 
+    if (shouldShow) {
+      expect(screen.getByRole('button', { name: '← ย้อนกลับ' })).toBeInTheDocument()
+    } else {
       expect(screen.queryByRole('button', { name: '← ย้อนกลับ' })).not.toBeInTheDocument()
-    },
-  )
+    }
+  })
+
+  it('toggles the mobile navigation and theme', () => {
+    document.documentElement.dataset.theme = 'light'
+    render(
+      <MemoryRouter
+        initialEntries={['/']}
+        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+      >
+        <Navbar />
+      </MemoryRouter>,
+    )
+
+    const menuToggle = screen.getByRole('button', { name: 'เปิดเมนู' })
+    expect(menuToggle).toHaveAttribute('aria-expanded', 'false')
+    fireEvent.click(menuToggle)
+    expect(screen.getByRole('button', { name: 'ปิดเมนู' })).toHaveAttribute('aria-expanded', 'true')
+
+    fireEvent.click(screen.getByRole('button', { name: 'เปลี่ยนเป็นโหมดมืด' }))
+    expect(document.documentElement).toHaveAttribute('data-theme', 'dark')
+    expect(localStorage.getItem('finding-home-theme')).toBe('dark')
+  })
 })

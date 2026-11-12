@@ -1,13 +1,24 @@
 import { useEffect, useState } from 'react'
 
-export default function DogImage({ src, alt, className = '', loading = 'lazy' }) {
-  const [failed, setFailed] = useState(false)
+const SHIBA_FALLBACK = 'https://images.dog.ceo/breeds/shiba/shiba-4.jpg'
+const DOG_FALLBACK = 'https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=1200&q=85'
 
-  useEffect(() => setFailed(false), [src])
+export default function DogImage({
+  src,
+  alt,
+  placeholderAlt = 'ไม่มีรูปสุนัข',
+  breed = '',
+  className = '',
+  loading = 'lazy',
+}) {
+  const [imageSrc, setImageSrc] = useState(src)
+  const fallbackSrc = /shiba/i.test(breed) ? SHIBA_FALLBACK : DOG_FALLBACK
 
-  if (!src || failed) {
+  useEffect(() => setImageSrc(src), [src])
+
+  if (!src || !imageSrc) {
     return (
-      <div className={`dog-image-placeholder ${className}`} role="img" aria-label="ไม่มีรูปสุนัข">
+      <div className={`dog-image-placeholder ${className}`} role="img" aria-label={placeholderAlt}>
         🐶
       </div>
     )
@@ -16,10 +27,10 @@ export default function DogImage({ src, alt, className = '', loading = 'lazy' })
   return (
     <img
       className={className}
-      src={src}
+      src={imageSrc}
       alt={alt}
       loading={loading}
-      onError={() => setFailed(true)}
+      onError={() => setImageSrc((current) => current === fallbackSrc ? null : fallbackSrc)}
     />
   )
 }

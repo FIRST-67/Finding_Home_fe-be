@@ -8,6 +8,7 @@ import DogFormPage from '../pages/admin/DogFormPage'
 import ManageDogsPage from '../pages/admin/ManageDogsPage'
 import ManageRequestsPage from '../pages/admin/ManageRequestsPage'
 import DogDetailPage from '../pages/DogDetailPage'
+import ExplorePage from '../pages/ExplorePage'
 import HomePage from '../pages/HomePage'
 import LoginPage from '../pages/LoginPage'
 import ProfilePage from '../pages/ProfilePage'
@@ -17,6 +18,7 @@ export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
+      <Route path="/explore" element={<ExplorePage />} />
       <Route path="/dogs/:dogId" element={<DogDetailPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />

@@ -32,6 +32,24 @@ describe('DogCard', () => {
     const image = screen.getByRole('img', { name: 'ถุงทอง' })
     expect(image).toHaveAttribute('loading', 'lazy')
     fireEvent.error(image)
+    expect(screen.getByRole('img', { name: 'ถุงทอง' })).toHaveAttribute(
+      'src',
+      'https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=1200&q=85',
+    )
+    fireEvent.error(screen.getByRole('img', { name: 'ถุงทอง' }))
     expect(screen.getByRole('img', { name: 'ไม่มีรูปสุนัข' })).toBeInTheDocument()
+  })
+
+  it('uses a matching Shiba Inu photo when the backend photo cannot load', () => {
+    render(
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <DogCard dog={{ id: 3, name: 'Mochi', breed_name: 'Shiba Inu', image_url: '/broken.jpg' }} />
+      </MemoryRouter>,
+    )
+    fireEvent.error(screen.getByRole('img', { name: 'Mochi' }))
+    expect(screen.getByRole('img', { name: 'Mochi' })).toHaveAttribute(
+      'src',
+      'https://images.dog.ceo/breeds/shiba/shiba-4.jpg',
+    )
   })
 })
