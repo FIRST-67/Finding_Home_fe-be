@@ -83,7 +83,7 @@ export default function Navbar() {
             onClick={toggleTheme}
             aria-label={theme === 'dark' ? 'เปลี่ยนเป็นโหมดสว่าง' : 'เปลี่ยนเป็นโหมดมืด'}
           >
-            {theme === 'dark' ? '☀️ โหมดสว่าง' : '🌙 โหมดมืด'}
+            {theme === 'dark' ? 'โหมดสว่าง' : 'โหมดมืด'}
           </button>
         </nav>
       </div>

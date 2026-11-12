@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import DogImage from './DogImage'
 
 const SLIDE_INTERVAL = 4500
-const FADE_DURATION = 600
+const FADE_DURATION = 300
 
 function prefersReducedMotion() {
   return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false

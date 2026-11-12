@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { Heart, MapPin } from 'lucide-react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import DogImage from '../components/DogImage'
 import EmptyState from '../components/EmptyState'
@@ -79,12 +80,14 @@ export default function DogDetailPage() {
         <p className="eyebrow">ทำความรู้จักเพื่อนใหม่</p>
         <div className="dog-detail__title">
           <h1>{dog.name}</h1>
-          <span className="dog-card__status">{dog.status === 'available' ? 'พร้อมหาบ้าน' : 'ได้บ้านแล้ว'}</span>
+          <span className={`dog-card__status${dog.status === 'available' ? ' dog-card__status--available' : ' dog-card__status--adopted'}`}>
+            {dog.status === 'available' ? 'พร้อมหาบ้าน' : 'ได้บ้านแล้ว'}
+          </span>
         </div>
         <p className="dog-detail__facts">
           {dog.breed_name || 'ไม่ทราบสายพันธุ์'} <span>·</span> {dog.age_years == null ? 'ไม่ทราบอายุ' : age} <span>·</span> {dog.gender === 'female' ? 'เพศเมีย' : 'เพศผู้'}
         </p>
-        {location && <p className="dog-detail__location">⌖ {location}</p>}
+        {location && <p className="dog-detail__location"><MapPin size={16} aria-hidden="true" />{location}</p>}
         <section className="detail-panel">
           <h2>นิสัยและการดูแล</h2>
           <p>{dog.description || 'ศูนย์ช่วยเหลือยังไม่ได้เพิ่มรายละเอียดน้องหมา'}</p>
@@ -101,7 +104,12 @@ export default function DogDetailPage() {
         <div className="button-row dog-detail__actions">
           {user?.role !== 'admin' && (
             <button className="button-link button-link--secondary" type="button" disabled={savingFavorite} onClick={toggleFavorite}>
-              {savingFavorite ? 'กำลังบันทึก...' : favorite ? '♥ นำออกจากรายการโปรด' : '♡ เพิ่มในรายการโปรด'}
+              {savingFavorite ? 'กำลังบันทึก...' : (
+                <>
+                  <Heart size={16} fill={favorite ? 'currentColor' : 'none'} aria-hidden="true" />
+                  {favorite ? 'นำออกจากรายการโปรด' : 'เพิ่มในรายการโปรด'}
+                </>
+              )}
             </button>
           )}
           {canAdopt && (

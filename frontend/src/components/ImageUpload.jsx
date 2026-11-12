@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { PawPrint } from 'lucide-react'
 import DogImage from './DogImage'
 import { validateImageFile } from '../utils/validators'
 
@@ -40,7 +41,9 @@ export default function ImageUpload({
       ) : currentImage ? (
         <DogImage src={currentImage} alt="รูปสุนัขปัจจุบัน" className="image-upload__preview" />
       ) : (
-        <div className="image-upload__preview dog-image-placeholder" role="img" aria-label="ยังไม่มีรูปสุนัข">🐶</div>
+        <div className="image-upload__preview dog-image-placeholder" role="img" aria-label="ยังไม่มีรูปสุนัข">
+          <PawPrint aria-hidden="true" />
+        </div>
       )}
       <label className="file-label">
         เลือกรูป JPG, PNG หรือ WEBP (ไม่เกิน 2MB)

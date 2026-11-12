@@ -4,13 +4,15 @@ import DogCard from './DogCard'
 
 describe('DogCard', () => {
   it('แสดงข้อมูลสุนัขและรูปสำรองเมื่อไม่มีรูป', () => {
-    render(
+    const { container } = render(
       <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <DogCard dog={{
           id: 1,
           name: 'มะลิ',
           breed_name: 'ไทยผสม',
           age_years: 2,
+          gender: 'male',
+          province: 'เชียงใหม่',
           description: 'เป็นมิตร',
           image_url: '',
         }} />
@@ -18,9 +20,13 @@ describe('DogCard', () => {
     )
 
     expect(screen.getByRole('heading', { name: 'มะลิ' })).toBeInTheDocument()
-    expect(screen.getByText('ไทยผสม · 2 ปี')).toBeInTheDocument()
+    expect(screen.getByText('ไทยผสม')).toBeInTheDocument()
+    expect(screen.getByText('เพศผู้')).toBeInTheDocument()
+    expect(screen.getByText('2 ปี')).toBeInTheDocument()
+    expect(screen.getByText('เชียงใหม่')).toBeInTheDocument()
     expect(screen.getByText('เป็นมิตร')).toBeInTheDocument()
-    expect(screen.getByRole('img', { name: 'ไม่มีรูปสุนัข' })).toHaveTextContent('🐶')
+    expect(screen.getByRole('img', { name: 'ไม่มีรูปสุนัข' })).toBeInTheDocument()
+    expect(container.querySelector('.lucide-paw-print')).toBeInTheDocument()
   })
 
   it('แสดงรูปสุนัขแบบ lazy และ fallback เมื่อรูปโหลดไม่ได้', () => {

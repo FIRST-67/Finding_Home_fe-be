@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import DogCard from '../components/DogCard'
+import DogCardSkeletons from '../components/DogCardSkeletons'
 import EmptyState from '../components/EmptyState'
 import ErrorMessage from '../components/ErrorMessage'
-import Loading from '../components/Loading'
+import useReveal from '../hooks/useReveal'
 import { getDogs } from '../services/dogs'
 
 const EMPTY_FILTERS = { q: '', breed: '', age: '', size: '', gender: '', location: '' }
@@ -27,6 +28,7 @@ export default function ExplorePage() {
   }))
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const resultsHeadingReveal = useReveal()
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -118,21 +120,26 @@ export default function ExplorePage() {
         </label>
       </div>
 
-      <div className="section-heading explore-results-heading">
+      <div
+        className={`section-heading explore-results-heading reveal${resultsHeadingReveal.isRevealed ? ' is-revealed' : ''}`}
+        ref={resultsHeadingReveal.ref}
+      >
         <div>
           <p className="eyebrow">พร้อมพบครอบครัวใหม่</p>
           <h2>น้องหมาทั้งหมด</h2>
         </div>
         {!loading && !error && <span>{filteredDogs.length} ตัว</span>}
       </div>
-      {loading && <Loading>กำลังค้นหาน้องหมา...</Loading>}
+      {loading && <DogCardSkeletons count={8} />}
       {!loading && error && <ErrorMessage message={error} onRetry={load} />}
       {!loading && !error && filteredDogs.length === 0 && (
         <EmptyState>ยังไม่พบน้องหมาที่ตรงกับตัวกรอง ลองปรับเงื่อนไขอีกครั้ง</EmptyState>
       )}
       {!loading && !error && filteredDogs.length > 0 && (
         <div className="grid" role="region" aria-label="dog results">
-          {filteredDogs.map((dog) => <DogCard key={dog.id} dog={dog} />)}
+          {filteredDogs.map((dog, index) => (
+            <DogCard key={dog.id} dog={dog} style={{ '--stagger-delay': `${index * 60}ms` }} />
+          ))}
         </div>
       )}
     </section>

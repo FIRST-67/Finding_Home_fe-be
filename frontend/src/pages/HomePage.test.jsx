@@ -41,7 +41,7 @@ describe('HomePage', () => {
     getDogs.mockReturnValue(new Promise((resolve) => { resolveDogs = resolve }))
     renderHome()
 
-    expect(screen.getByText('กำลังค้นหาน้องหมา...')).toBeInTheDocument()
+    expect(screen.getByRole('status', { name: 'กำลังค้นหาน้องหมา...' })).toBeInTheDocument()
     resolveDogs({ data: availableDogs })
 
     expect(await screen.findByRole('heading', { name: 'มะลิ' })).toBeInTheDocument()
