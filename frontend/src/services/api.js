@@ -3,11 +3,12 @@ import ApiError from './ApiError'
 
 export { ApiError }
 
-const BASE_URL = (import.meta.env.VITE_API_URL || 'https://finding-home-dfe0.onrender.com').replace(/\/+$/, '')
+const defaultBaseUrl = process.env.NODE_ENV === 'development' ? '' : 'https://finding-home-dfe0.onrender.com'
+const BASE_URL = (process.env.REACT_APP_API_URL || defaultBaseUrl).replace(/\/+$/, '')
 const TOKEN_KEY = 'token'
 const USER_KEY = 'finding-home-user'
 
-export const isMockMode = import.meta.env.VITE_USE_MOCK === 'true'
+export const isMockMode = process.env.REACT_APP_USE_MOCK === 'true'
 let unauthorizedHandler
 
 export function setUnauthorizedHandler(handler) {

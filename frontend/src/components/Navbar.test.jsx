@@ -1,10 +1,9 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { vi } from 'vitest'
 import Navbar from './Navbar'
 
-vi.mock('../context/AuthContext', () => ({
-  useAuth: () => ({ isAuthenticated: false, user: null, logout: vi.fn() }),
+jest.mock('../context/AuthContext', () => ({
+  useAuth: () => ({ isAuthenticated: false, user: null, logout: jest.fn() }),
 }))
 
 describe('Navbar', () => {

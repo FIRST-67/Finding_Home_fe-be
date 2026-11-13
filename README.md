@@ -22,16 +22,16 @@ go run ./cmd/server       # http://localhost:8080
 ### Frontend
 ```bash
 cd frontend
-cp .env.example .env      # VITE_API_URL=http://localhost:8080
+cp .env.example .env      # REACT_APP_API_URL=http://localhost:8080
 npm install
-npm run dev               # http://localhost:5173
+npm start               # http://localhost:5173
 npm test                  # รัน unit test
 ```
 
 ## Deploy
 - **Render (Go)**: Root Directory `backend` • Build `go build -o app ./cmd/server` • Start `./app`
   - Env: `DATABASE_URL`, `DOG_API_KEY`, `JWT_SECRET`, `ALLOWED_ORIGIN` (URL ของ Vercel), `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`
-- **Vercel (React)**: Root Directory `frontend` • Env: `VITE_API_URL` (URL ของ Render), `VITE_USE_MOCK=false`
+- **Vercel (React)**: Root Directory `frontend` • Env: `REACT_APP_API_URL` (URL ของ Render), `REACT_APP_USE_MOCK=false`
 - **Supabase**: Settings → Database → Connection string (แนะนำใช้ Session pooler)
 
 ## อัปโหลดรูปสุนัข

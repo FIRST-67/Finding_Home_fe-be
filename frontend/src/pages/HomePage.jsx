@@ -35,7 +35,7 @@ function FeaturedDogs({ dogs }) {
         </div>
         <Link to="/explore">ดูทั้งหมด <span aria-hidden="true">→</span></Link>
       </div>
-      <div className="grid home-featured-grid">
+      <div className="grid home-featured-grid grid-cols-1 min-[541px]:grid-cols-2 min-[1024px]:grid-cols-4">
         {dogs.slice(0, 8).map((dog, index) => (
           <DogCard key={dog.id} dog={dog} style={{ '--stagger-delay': `${index * 60}ms` }} />
         ))}

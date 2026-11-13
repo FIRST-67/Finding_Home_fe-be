@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 * { box-sizing: border-box; }
 body { margin: 0; font-family: system-ui, sans-serif; color: var(--ink); background: var(--bg); }
 .site-header a { color: inherit; text-decoration: none; }
@@ -7,7 +11,7 @@ main { margin: 0 auto; }
 .search { display: flex; gap: 8px; margin-bottom: 24px; }
 .search input { flex: 1; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; }
 .search button { padding: 10px 16px; border: 0; border-radius: 8px; background: var(--accent); color: var(--surface); cursor: var(--cursor-clickable, pointer); }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.grid { display: grid; gap: 16px; }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
 .card img { width: 100%; height: 180px; object-fit: cover; background: var(--soft); display: block; }
 .card div { padding: 12px; }
@@ -514,8 +518,8 @@ main.page-container {
 .adoption-step__icon { position: absolute; top: 28px; right: 24px; color: var(--accent2); }
 .adoption-step h3 { margin: 17px 0 8px; color: var(--ink); font-size: 1rem; }
 .adoption-step p { margin: 0; color: var(--muted); line-height: 1.65; }
-.grid { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 18px; margin-top: 0; }
-.grid.home-featured-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.grid { gap: 18px; margin-top: 0; }
+.grid:not(.home-featured-grid) { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
 .dog-card {
   border: 1px solid var(--beige);
   border-radius: 20px;
@@ -720,10 +724,6 @@ main.page-container {
 th { background: var(--peach); color: var(--brown); }
 th, td { border-bottom-color: var(--beige); }
 
-@media (max-width: 1023px) {
-  .grid.home-featured-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-
 @media (max-width: 760px) {
   .site-header {
     padding-inline: 20px;
@@ -793,7 +793,6 @@ th, td { border-bottom-color: var(--beige); }
 }
 
 @media (max-width: 540px) {
-  .grid.home-featured-grid { grid-template-columns: minmax(0, 1fr); }
   .site-header { padding-inline: 14px; }
   .site-header__start { gap: 7px; }
   .nav-back { padding: 7px 8px; font-size: .7rem; }
@@ -826,7 +825,8 @@ th, td { border-bottom-color: var(--beige); }
   .hero-carousel__dot { width: 6px; height: 6px; }
   .hero-carousel__dot.is-active { width: 14px; }
   .hero-carousel__play { min-height: 21px; padding: 2px 6px; font-size: .6rem; }
-  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px; }
+  .grid:not(.home-featured-grid) { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px; }
+  .home-featured-grid { gap: 11px; }
   .dog-card { border-radius: 16px; }
   .dog-card__content { padding: 11px 11px 13px; }
   .dog-card h3 { font-size: .94rem; }
@@ -857,7 +857,7 @@ th, td { border-bottom-color: var(--beige); }
 }
 
 @media (max-width: 360px) {
-  .grid { grid-template-columns: 1fr; }
+  .grid:not(.home-featured-grid) { grid-template-columns: 1fr; }
   .home-intro__copy { max-width: 72%; }
 }
 
@@ -874,8 +874,8 @@ th, td { border-bottom-color: var(--beige); }
 /* Keep native cursors on touch devices, editable fields, and drag controls. */
 @media (hover: hover) and (pointer: fine) {
   :root {
-    --cursor-clickable: url('/paw-cursor.svg') 12 8, pointer;
-    cursor: url('/bone-cursor.svg') 9 6, auto;
+    --cursor-clickable: url('./assets/paw-cursor.svg') 12 8, pointer;
+    cursor: url('./assets/bone-cursor.svg') 9 6, auto;
   }
 
   :where(

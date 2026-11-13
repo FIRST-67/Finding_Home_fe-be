@@ -1,10 +1,9 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { afterEach, vi } from 'vitest'
 import HomePage from './HomePage'
 import { getDogs } from '../services/dogs'
 
-vi.mock('../services/dogs', () => ({ getDogs: vi.fn() }))
+jest.mock('../services/dogs', () => ({ getDogs: jest.fn() }))
 
 const availableDogs = [
   { id: 1, name: 'มะลิ', breed_name: 'ไทยผสม', age_years: 2, status: 'available' },
@@ -27,11 +26,11 @@ function renderHome() {
 
 describe('HomePage', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
-    vi.spyOn(Math, 'random').mockReturnValue(0.99)
+    jest.clearAllMocks()
+    jest.spyOn(Math, 'random').mockReturnValue(0.99)
   })
 
-  afterEach(() => vi.restoreAllMocks())
+  afterEach(() => jest.restoreAllMocks())
 
   it('shows loading and then dog listings, hero, adoption steps, and all five available dog cards', async () => {
     let resolveDogs

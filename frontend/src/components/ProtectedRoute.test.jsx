@@ -1,11 +1,10 @@
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { vi } from 'vitest'
 import { AuthProvider } from '../context/AuthContext'
 import ProtectedRoute from './ProtectedRoute'
 
-vi.mock('../services/auth', () => ({
-  getCurrentUser: vi.fn(() => new Promise(() => {})),
+jest.mock('../services/auth', () => ({
+  getCurrentUser: jest.fn(() => new Promise(() => {})),
 }))
 
 function renderProtected(path, requireRole) {

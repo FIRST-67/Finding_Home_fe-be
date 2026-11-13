@@ -1,24 +1,25 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiGet, apiPost, isMockMode, setUnauthorizedHandler } from './api'
 
-describe.skipIf(isMockMode)('API client', () => {
+const describeLive = isMockMode ? describe.skip : describe
+
+describeLive('API client', () => {
   beforeEach(() => {
     localStorage.clear()
   })
 
   afterEach(() => {
-    vi.unstubAllGlobals()
+    delete global.fetch
     localStorage.clear()
   })
 
   it('adds the bearer token and serializes JSON requests', async () => {
     localStorage.setItem('token', 'test-token')
-    const fetchMock = vi.fn().mockResolvedValue({
+    const fetchMock = jest.fn().mockResolvedValue({
       ok: true,
       status: 200,
       text: async () => JSON.stringify({ id: 1 }),
     })
-    vi.stubGlobal('fetch', fetchMock)
+    global.fetch = fetchMock
     const body = { sample: true }
 
     await apiPost('/api/test', body)
@@ -31,12 +32,12 @@ describe.skipIf(isMockMode)('API client', () => {
 
   it('gets the session from the backend in live mode', async () => {
     localStorage.setItem('token', 'backend-test-token')
-    const fetchMock = vi.fn().mockResolvedValue({
+    const fetchMock = jest.fn().mockResolvedValue({
       ok: true,
       status: 200,
       text: async () => JSON.stringify({ id: 2, role: 'admin' }),
     })
-    vi.stubGlobal('fetch', fetchMock)
+    global.fetch = fetchMock
 
     await expect(apiGet('/api/auth/me')).resolves.toMatchObject({ id: 2, role: 'admin' })
     const [url, options] = fetchMock.mock.calls[0]
@@ -46,12 +47,12 @@ describe.skipIf(isMockMode)('API client', () => {
 
   it('sends the file as multipart with the existing bearer token', async () => {
     localStorage.setItem('token', 'backend-test-token')
-    const fetchMock = vi.fn().mockResolvedValue({
+    const fetchMock = jest.fn().mockResolvedValue({
       ok: true,
       status: 201,
       text: async () => JSON.stringify({ image_url: 'https://storage.example/dog.jpg' }),
     })
-    vi.stubGlobal('fetch', fetchMock)
+    global.fetch = fetchMock
     const form = new FormData()
     form.append('file', new File(['photo'], 'dog.jpg', { type: 'image/jpeg' }))
 
@@ -65,17 +66,17 @@ describe.skipIf(isMockMode)('API client', () => {
   })
 
   it('loads dogs from the configured backend', async () => {
-    const fetchMock = vi.fn().mockResolvedValue({
+    const fetchMock = jest.fn().mockResolvedValue({
       ok: true,
       status: 200,
       text: async () => JSON.stringify({ data: [], page: 1, limit: 12, total: 0 }),
     })
-    vi.stubGlobal('fetch', fetchMock)
+    global.fetch = fetchMock
 
     await apiGet('/api/dogs')
 
     expect(fetchMock).toHaveBeenCalledWith(
-      `${(import.meta.env.VITE_API_URL || 'https://finding-home-dfe0.onrender.com').replace(/\/+$/, '')}/api/dogs`,
+      `${(process.env.REACT_APP_API_URL || 'https://finding-home-dfe0.onrender.com').replace(/\/+$/, '')}/api/dogs`,
       expect.objectContaining({ method: 'GET' }),
     )
   })
@@ -83,18 +84,18 @@ describe.skipIf(isMockMode)('API client', () => {
   it('clears saved auth and calls the unauthorized handler on 401', async () => {
     localStorage.setItem('token', 'expired-token')
     localStorage.setItem('finding-home-user', JSON.stringify({ id: 'user-1' }))
-    const onUnauthorized = vi.fn()
+    const onUnauthorized = jest.fn()
     const removeHandler = setUnauthorizedHandler(onUnauthorized)
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+    global.fetch = jest.fn().mockResolvedValue({
       ok: false,
       status: 401,
       text: async () => JSON.stringify({ message: 'Session expired' }),
-    }))
+    })
 
     await expect(apiGet('/api/test')).rejects.toMatchObject({ message: 'Session expired', status: 401 })
     expect(localStorage.getItem('token')).toBeNull()
     expect(localStorage.getItem('finding-home-user')).toBeNull()
-    expect(onUnauthorized).toHaveBeenCalledOnce()
+    expect(onUnauthorized).toHaveBeenCalledTimes(1)
     removeHandler()
   })
 })

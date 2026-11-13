@@ -1,6 +1,5 @@
 import { act, fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { afterEach, describe, expect, it, vi } from 'vitest'
 import HeroCarousel from './HeroCarousel'
 
 const dogs = [
@@ -18,9 +17,9 @@ function renderCarousel(items = dogs) {
 
 describe('HeroCarousel', () => {
   afterEach(() => {
-    vi.useRealTimers()
-    vi.restoreAllMocks()
-    vi.unstubAllGlobals()
+    jest.useRealTimers()
+    jest.restoreAllMocks()
+    delete window.matchMedia
   })
 
   it('changes to the next slide when its control is pressed', () => {
@@ -33,44 +32,44 @@ describe('HeroCarousel', () => {
   })
 
   it('pauses while hovered and resumes autoplay after pointer leaves', () => {
-    vi.useFakeTimers()
+    jest.useFakeTimers()
     renderCarousel()
     const carousel = screen.getByRole('region', { name: 'น้องหมาที่พร้อมหาบ้าน' })
 
     fireEvent.mouseEnter(carousel)
-    act(() => vi.advanceTimersByTime(9000))
+    act(() => jest.advanceTimersByTime(9000))
     expect(screen.getByRole('link', { name: 'ดูข้อมูลMochi' })).toBeInTheDocument()
 
     fireEvent.mouseLeave(carousel)
-    act(() => vi.advanceTimersByTime(4500))
+    act(() => jest.advanceTimersByTime(4500))
     expect(screen.getByRole('link', { name: 'ดูข้อมูลMali' })).toBeInTheDocument()
   })
 
   it('keeps autoplay stopped after the pointer leaves when manually paused', () => {
-    vi.useFakeTimers()
+    jest.useFakeTimers()
     renderCarousel()
     const carousel = screen.getByRole('region', { name: 'น้องหมาที่พร้อมหาบ้าน' })
 
     fireEvent.click(screen.getByRole('button', { name: 'หยุดเล่นสไลด์อัตโนมัติ' }))
     fireEvent.mouseEnter(carousel)
     fireEvent.mouseLeave(carousel)
-    act(() => vi.advanceTimersByTime(9000))
+    act(() => jest.advanceTimersByTime(9000))
 
     expect(screen.getByRole('link', { name: 'ดูข้อมูลMochi' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'เล่นสไลด์อัตโนมัติ' })).toBeInTheDocument()
   })
 
   it('disables autoplay when reduced motion is preferred', () => {
-    vi.useFakeTimers()
-    vi.stubGlobal('matchMedia', vi.fn(() => ({
+    jest.useFakeTimers()
+    window.matchMedia = jest.fn(() => ({
       matches: true,
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-    })))
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+    }))
     renderCarousel()
 
     expect(screen.getByRole('button', { name: 'เล่นสไลด์อัตโนมัติ' })).toBeDisabled()
-    act(() => vi.advanceTimersByTime(9000))
+    act(() => jest.advanceTimersByTime(9000))
     expect(screen.getByRole('link', { name: 'ดูข้อมูลMochi' })).toBeInTheDocument()
   })
 

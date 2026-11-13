@@ -1,4 +1,3 @@
-import { beforeEach, describe, expect, it } from 'vitest'
 import { mockAdoptionRequests, mockDogs, mockFavorites } from './data'
 import { mockRequest } from './api'
 

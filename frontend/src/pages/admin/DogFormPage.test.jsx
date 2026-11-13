@@ -1,19 +1,18 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { vi } from 'vitest'
 import DogFormPage from './DogFormPage'
 import { createDog, getDog, updateDog, uploadDogImage } from '../../services/dogs'
 
-vi.mock('../../services/dogs', () => ({
-  createDog: vi.fn(),
-  getDog: vi.fn(),
-  updateDog: vi.fn(),
-  uploadDogImage: vi.fn(),
+jest.mock('../../services/dogs', () => ({
+  createDog: jest.fn(),
+  getDog: jest.fn(),
+  updateDog: jest.fn(),
+  uploadDogImage: jest.fn(),
 }))
 
 describe('DogFormPage', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
+    jest.clearAllMocks()
     createDog.mockResolvedValue({ id: 4 })
     uploadDogImage.mockResolvedValue('https://storage.example/dog.png')
   })
@@ -48,7 +47,7 @@ describe('DogFormPage', () => {
         image_url: 'https://storage.example/dog.png',
       }))
     })
-    expect(uploadDogImage).toHaveBeenCalledOnce()
+    expect(uploadDogImage).toHaveBeenCalledTimes(1)
     expect(await screen.findByText('รายการสุนัข')).toBeInTheDocument()
   })
 
@@ -79,7 +78,7 @@ describe('DogFormPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'บันทึกสุนัข' }))
 
     expect(await screen.findByText('รายการสุนัข')).toBeInTheDocument()
-    expect(uploadDogImage).toHaveBeenCalledOnce()
+    expect(uploadDogImage).toHaveBeenCalledTimes(1)
     expect(uploadDogImage).toHaveBeenCalledWith(file)
     expect(updateDog).toHaveBeenLastCalledWith('9', expect.objectContaining({
       status: 'adopted',
@@ -108,7 +107,7 @@ describe('DogFormPage', () => {
     const saving = screen.getByRole('button', { name: 'กำลังอัปโหลดรูป...' })
     expect(saving).toBeDisabled()
     fireEvent.submit(saving.closest('form'))
-    expect(uploadDogImage).toHaveBeenCalledOnce()
+    expect(uploadDogImage).toHaveBeenCalledTimes(1)
     rejectUpload({ status: 415 })
     expect(await screen.findByRole('alert')).toHaveTextContent('ไฟล์รูปไม่ถูกต้อง')
     expect(createDog).not.toHaveBeenCalled()

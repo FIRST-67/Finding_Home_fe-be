@@ -1,14 +1,13 @@
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { vi } from 'vitest'
 import ExplorePage from './ExplorePage'
 import { getDogs } from '../services/dogs'
 
-vi.mock('../services/dogs', () => ({ getDogs: vi.fn() }))
+jest.mock('../services/dogs', () => ({ getDogs: jest.fn() }))
 
 describe('ExplorePage', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
+    jest.clearAllMocks()
     getDogs.mockResolvedValue({
       data: [
         { id: 1, name: 'มะลิ', breed_name: 'ไทยผสม', age_years: 2, gender: 'female', location: 'เชียงใหม่', status: 'available' },

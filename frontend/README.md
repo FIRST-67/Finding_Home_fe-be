@@ -1,18 +1,18 @@
 # Finding Home — Frontend
 
-React + Vite frontend for browsing dogs looking for a home, adoption requests, and admin dog management.
+Create React App + Tailwind CSS frontend for browsing dogs looking for a home, adoption requests, and admin dog management.
 
 ## Run locally
 
 ```bash
 npm install
 cp .env.example .env
-npm run dev
+npm start
 ```
 
-The local `.env.example` points directly to `https://finding-home-dfe0.onrender.com`. Dog listing and detail pages use its live `/api/dogs` endpoints. Set `VITE_USE_MOCK=true` to run with local sample data; auth, profile, favorites, and adoption-request endpoints remain mocked until their backend contract is confirmed.
+With `REACT_APP_API_URL` empty, the development server proxies API requests to `https://finding-home-dfe0.onrender.com`. Set `REACT_APP_USE_MOCK=true` to run with local sample data.
 
-For a local Go API, set `VITE_API_URL=http://localhost:8080`. The local Go API branch provides health/database checks and dog-breed proxy routes; dog listing/detail is available through the deployed API configured above. The backend must allow both `http://127.0.0.1:5173` and `http://localhost:5173` in CORS for local browser requests.
+For a local Go API, set `REACT_APP_API_URL=http://localhost:8080`. The example sets `PORT=5173` to preserve the existing local backend CORS configuration. The backend must allow both `http://127.0.0.1:5173` and `http://localhost:5173` in CORS for local browser requests.
 
 Run checks with `npm test` and create a production build with `npm run build`.
 
@@ -22,6 +22,6 @@ Pages call domain services such as `services/dogs.js` or `services/auth.js`. Tho
 
 ## Deploy to Vercel
 
-Import the repository and set the Vercel project **Root Directory** to `frontend`. The Vite build command and output directory are `npm run build` and `dist`. The default `VITE_API_URL` uses the deployed API; override it in Vercel if needed, and set `VITE_USE_MOCK=false` to use live dog data. `vercel.json` rewrites client-side routes to `index.html`.
+Import the repository and set the Vercel project **Root Directory** to `frontend`. Use the Create React App framework preset. The build command is `npm run build` and the output directory is `build`. The default `REACT_APP_API_URL` uses the deployed API; override it in Vercel if needed, and set `REACT_APP_USE_MOCK=false` to use live dog data. `vercel.json` rewrites client-side routes to `index.html`.
 
-The API must allow the local Vite origin and the deployed frontend origin in CORS. Confirm auth, favorites, and adoption-request routes match the frontend contract before enabling them outside mock mode.
+The API must allow the local frontend origin and the deployed frontend origin in CORS. Confirm auth, favorites, and adoption-request routes match the frontend contract before enabling them outside mock mode.

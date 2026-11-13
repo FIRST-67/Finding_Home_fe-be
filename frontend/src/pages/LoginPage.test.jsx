@@ -1,16 +1,15 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { vi } from 'vitest'
 import { AuthProvider } from '../context/AuthContext'
 import LoginPage from './LoginPage'
 import { login } from '../services/auth'
 
-vi.mock('../services/auth', () => ({ login: vi.fn() }))
+jest.mock('../services/auth', () => ({ login: jest.fn() }))
 
 describe('LoginPage', () => {
   beforeEach(() => {
     localStorage.clear()
-    vi.clearAllMocks()
+    jest.clearAllMocks()
   })
 
   it('validates email and minimum password length in Thai without sending a request', async () => {

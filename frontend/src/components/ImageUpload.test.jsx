@@ -1,5 +1,4 @@
 import { fireEvent, render, screen } from '@testing-library/react'
-import { vi } from 'vitest'
 import ImageUpload from './ImageUpload'
 
 describe('ImageUpload', () => {
@@ -7,7 +6,7 @@ describe('ImageUpload', () => {
     ['image/gif', 100, 'รองรับเฉพาะไฟล์ JPG, PNG หรือ WEBP เท่านั้น'],
     ['image/jpeg', 2 * 1024 * 1024 + 1, 'ขนาดไฟล์รูปภาพต้องไม่เกิน 2MB'],
   ])('ปฏิเสธไฟล์ชนิด %s ขนาด %i และไม่เรียกอัปโหลด', async (type, size, message) => {
-    const onUpload = vi.fn()
+    const onUpload = jest.fn()
     const file = new File([new Uint8Array(size)], 'photo.bin', { type })
     render(<ImageUpload onUpload={onUpload} />)
 
@@ -19,7 +18,7 @@ describe('ImageUpload', () => {
   })
 
   it('แสดง preview และเรียกอัปโหลดได้เมื่อไฟล์ถูกต้อง', () => {
-    const onUpload = vi.fn()
+    const onUpload = jest.fn()
     const file = new File(['image'], 'photo.webp', { type: 'image/webp' })
     render(<ImageUpload onUpload={onUpload} />)
     fireEvent.change(screen.getByLabelText(/เลือกรูป/), { target: { files: [file] } })
