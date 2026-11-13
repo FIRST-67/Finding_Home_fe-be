@@ -17,6 +17,7 @@ export default function DogCard({
 
   return (
     <article className="dog-card dog-card--enter" style={style}>
+      <span className="dog-card__ears" aria-hidden="true" />
       <div className="dog-card__photo">
         <Link className="dog-card__image-link" to={`/dogs/${dog.id}`} aria-label={`ดูข้อมูล${dog.name}`}>
           <DogImage src={dog.image_url} alt={dog.name} breed={dog.breed_name} />

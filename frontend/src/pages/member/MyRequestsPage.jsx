@@ -1,7 +1,8 @@
+import { Link } from 'react-router-dom'
 import { useCallback, useEffect, useState } from 'react'
 import EmptyState from '../../components/EmptyState'
 import ErrorMessage from '../../components/ErrorMessage'
-import Loading from '../../components/Loading'
+import PawLoader from '../../components/PawLoader'
 import { cancelRequest, getMyRequests } from '../../services/requests'
 
 function statusLabel(status) {
@@ -48,9 +49,13 @@ export default function MyRequestsPage() {
   return (
     <section>
       <h1>คำขอรับเลี้ยงของฉัน</h1>
-      {loading && <Loading />}
+      {loading && <PawLoader />}
       {!loading && error && <ErrorMessage message={error} onRetry={load} />}
-      {!loading && !error && !requests.length && <EmptyState>คุณยังไม่มีคำขอรับเลี้ยง</EmptyState>}
+      {!loading && !error && !requests.length && (
+        <EmptyState illustrated action={<Link className="button-link" to="/explore">เลือกดูน้องหมา</Link>}>
+          ยังไม่มีคำขอรับเลี้ยง
+        </EmptyState>
+      )}
       {!loading && !error && Boolean(requests.length) && (
         <div className="request-list">
           {requests.map((request) => (

@@ -1,8 +1,9 @@
+import { Link } from 'react-router-dom'
 import { useCallback, useEffect, useState } from 'react'
 import DogCard from '../../components/DogCard'
 import EmptyState from '../../components/EmptyState'
 import ErrorMessage from '../../components/ErrorMessage'
-import Loading from '../../components/Loading'
+import PawLoader from '../../components/PawLoader'
 import { getFavorites, removeFavorite } from '../../services/favorites'
 
 export default function FavoritesPage() {
@@ -46,9 +47,13 @@ export default function FavoritesPage() {
         <h1>น้องหมาที่คุณชื่นชอบ</h1>
         <p>เพื่อนสี่ขาที่คุณสนใจและอยากทำความรู้จัก</p>
       </header>
-      {loading && <Loading />}
+      {loading && <PawLoader />}
       {!loading && error && <ErrorMessage message={error} onRetry={load} />}
-      {!loading && !error && !dogs.length && <EmptyState>ยังไม่มีรายการโปรด ลองเลือกน้องหมาที่ถูกใจ</EmptyState>}
+      {!loading && !error && !dogs.length && (
+        <EmptyState illustrated action={<Link className="button-link" to="/explore">ไปค้นหาน้องหมา</Link>}>
+          ยังไม่มีน้องหมาในรายการโปรด
+        </EmptyState>
+      )}
       {!loading && !error && Boolean(dogs.length) && (
         <div className="grid">{dogs.map((dog) => (
           <DogCard

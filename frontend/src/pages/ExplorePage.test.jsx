@@ -37,6 +37,33 @@ describe('ExplorePage', () => {
     expect(within(screen.getByRole('region', { name: 'dog results' })).queryByText('ถุงทอง')).not.toBeInTheDocument()
   })
 
+  it('shows paw loading, then allows clearing filters from the empty results', async () => {
+    render(
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <ExplorePage />
+      </MemoryRouter>,
+    )
+    expect(screen.getByRole('status')).toHaveTextContent('กำลังตามหาน้องหมา...')
+    expect(screen.queryByText('ยังไม่พบน้องหมาที่ตรงกับการค้นหา')).not.toBeInTheDocument()
+    await screen.findByRole('heading', { name: 'มะลิ' })
+    expect(screen.queryByText('กำลังตามหาน้องหมา...')).not.toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText('ค้นหาชื่อหรือสายพันธุ์'), { target: { value: 'ไม่มีผลลัพธ์' } })
+    expect(screen.getByRole('status')).toHaveTextContent('ยังไม่พบน้องหมาที่ตรงกับการค้นหา')
+    fireEvent.click(screen.getByRole('button', { name: 'ล้างตัวกรอง' }))
+    expect(screen.getByRole('heading', { name: 'มะลิ' })).toBeVisible()
+  })
+
+  it('shows an API error without an empty state', async () => {
+    getDogs.mockRejectedValueOnce(new Error('โหลดไม่สำเร็จ'))
+    render(
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <ExplorePage />
+      </MemoryRouter>,
+    )
+    expect(await screen.findByRole('alert')).toHaveTextContent('โหลดไม่สำเร็จ')
+    expect(screen.queryByText('ยังไม่พบน้องหมาที่ตรงกับการค้นหา')).not.toBeInTheDocument()
+  })
+
   it('initializes filters from the q, sex, and breed query parameters', async () => {
     render(
       <MemoryRouter

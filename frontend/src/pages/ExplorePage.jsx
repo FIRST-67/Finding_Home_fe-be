@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import DogCard from '../components/DogCard'
+import PawLoader from '../components/PawLoader'
 import DogCardSkeletons from '../components/DogCardSkeletons'
 import EmptyState from '../components/EmptyState'
 import ErrorMessage from '../components/ErrorMessage'
@@ -130,10 +131,14 @@ export default function ExplorePage() {
         </div>
         {!loading && !error && <span>{filteredDogs.length} ตัว</span>}
       </div>
-      {loading && <DogCardSkeletons count={8} />}
+      {loading && <DogCardSkeletons count={8} loader={<PawLoader compact>กำลังตามหาน้องหมา...</PawLoader>} />}
       {!loading && error && <ErrorMessage message={error} onRetry={load} />}
       {!loading && !error && filteredDogs.length === 0 && (
-        <EmptyState>ยังไม่พบน้องหมาที่ตรงกับตัวกรอง ลองปรับเงื่อนไขอีกครั้ง</EmptyState>
+        <EmptyState illustrated action={Object.values(filters).some(Boolean) && (
+          <button type="button" onClick={() => setFilters(EMPTY_FILTERS)}>ล้างตัวกรอง</button>
+        )}>
+          ยังไม่พบน้องหมาที่ตรงกับการค้นหา
+        </EmptyState>
       )}
       {!loading && !error && filteredDogs.length > 0 && (
         <div className="grid" role="region" aria-label="dog results">

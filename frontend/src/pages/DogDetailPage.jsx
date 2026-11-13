@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Heart, MapPin } from 'lucide-react'
+import { Heart, MapPin, PawPrint } from 'lucide-react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import DogImage from '../components/DogImage'
 import EmptyState from '../components/EmptyState'
 import ErrorMessage from '../components/ErrorMessage'
-import Loading from '../components/Loading'
+import PawLoader from '../components/PawLoader'
 import { useAuth } from '../context/AuthContext'
 import { getDog } from '../services/dogs'
 import { addFavorite, getFavorites, removeFavorite } from '../services/favorites'
@@ -17,6 +17,8 @@ export default function DogDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [favorite, setFavorite] = useState(false)
+  const [celebratingDog, setCelebratingDog] = useState(null)
+  const celebrating = favorite && celebratingDog === dogId
   const [actionError, setActionError] = useState('')
   const [savingFavorite, setSavingFavorite] = useState(false)
 
@@ -50,11 +52,15 @@ export default function DogDetailPage() {
       return
     }
     if (user?.role !== 'member') return
+    setCelebratingDog(null)
     setSavingFavorite(true)
     setActionError('')
     try {
       if (favorite) await removeFavorite(dogId)
-      else await addFavorite(dogId)
+      else {
+        await addFavorite(dogId)
+        setCelebratingDog(dogId)
+      }
       setFavorite(!favorite)
     } catch (error) {
       setActionError(error.message)
@@ -63,7 +69,7 @@ export default function DogDetailPage() {
     }
   }
 
-  if (loading) return <Loading>กำลังโหลดข้อมูลน้องหมา...</Loading>
+  if (loading) return <PawLoader>กำลังโหลดข้อมูลน้องหมา...</PawLoader>
   if (error) return <ErrorMessage message={error} onRetry={loadDog} />
   if (!dog) return <EmptyState>ไม่พบข้อมูลน้องหมา</EmptyState>
 
@@ -103,7 +109,17 @@ export default function DogDetailPage() {
         {actionError && <ErrorMessage message={actionError} />}
         <div className="button-row dog-detail__actions">
           {user?.role !== 'admin' && (
-            <button className="button-link button-link--secondary" type="button" disabled={savingFavorite} onClick={toggleFavorite}>
+            <button
+              className={`button-link button-link--secondary favorite-action${celebrating ? ' is-celebrating' : ''}`}
+              type="button"
+              disabled={savingFavorite}
+              onClick={toggleFavorite}
+            >
+              {celebrating && (
+                <span className="favorite-action__paws" aria-hidden="true" onAnimationEnd={() => setCelebratingDog(null)}>
+                  <PawPrint size={13} /><PawPrint size={11} /><PawPrint size={14} />
+                </span>
+              )}
               {savingFavorite ? 'กำลังบันทึก...' : (
                 <>
                   <Heart size={16} fill={favorite ? 'currentColor' : 'none'} aria-hidden="true" />

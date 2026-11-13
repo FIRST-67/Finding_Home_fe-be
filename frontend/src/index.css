@@ -910,3 +910,112 @@ th, td { border-bottom-color: var(--beige); }
     cursor: not-allowed;
   }
 }
+
+/* Keep the ears outside the card without unclipping the photo itself. */
+.dog-card { position: relative; overflow: visible; }
+.dog-card__photo { border-radius: inherit; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+.dog-card__ears {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 68px;
+  height: 21px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 0);
+  transition: transform 260ms ease, opacity 260ms ease;
+}
+.dog-card__ears::before, .dog-card__ears::after {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--button-color);
+  border-radius: 70% 60% 35% 35%;
+  background: var(--peach);
+  content: "";
+}
+.dog-card__ears::before { left: 0; transform: rotate(-24deg); }
+.dog-card__ears::after { right: 0; transform: rotate(24deg); }
+.dog-card:has(:focus-visible) .dog-card__ears { opacity: 1; transform: translate(-50%, -16px); }
+@media (hover: hover) and (pointer: fine) {
+  .dog-card:hover .dog-card__ears { opacity: 1; transform: translate(-50%, -16px); }
+}
+
+.favorite-action { position: relative; }
+.favorite-action__paws {
+  position: absolute;
+  top: 1px;
+  left: 50%;
+  display: flex;
+  gap: 4px;
+  color: var(--terracotta);
+  pointer-events: none;
+  opacity: 0;
+  animation: favorite-paws 580ms ease-out;
+}
+.favorite-action__paws svg:nth-child(2) { margin-top: -5px; }
+.favorite-action.is-celebrating > .lucide-heart { animation: favorite-heart 440ms ease-out; }
+@keyframes favorite-paws {
+  0% { opacity: 0; transform: translate(-50%, 0) scale(.65); }
+  28% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -25px) scale(1); }
+}
+@keyframes favorite-heart {
+  0%, 100% { transform: scale(1); }
+  38% { transform: scale(1.25); }
+}
+
+.paw-loader { display: grid; justify-items: center; gap: 8px; }
+.paw-loader--compact { grid-column: 1 / -1; padding: 8px; color: var(--muted); font-size: .88rem; }
+.paw-loader svg {
+  color: var(--terracotta);
+  animation: paw-step 1.6s ease-in-out infinite;
+  animation-delay: calc(var(--paw-step) * 160ms);
+}
+@keyframes paw-step {
+  0%, 80%, 100% { opacity: .45; }
+  30%, 55% { opacity: 1; }
+}
+
+.empty-state__house { width: 132px; }
+.empty-state__house > g { animation: empty-puppy-in 280ms ease-out; }
+@keyframes empty-puppy-in { from { opacity: 0; } to { opacity: 1; } }
+
+.corner-puppy {
+  position: fixed;
+  right: 10px;
+  bottom: 12px;
+  z-index: 10;
+  width: 65px;
+  pointer-events: none;
+  animation: corner-puppy-in 300ms ease-out;
+}
+.corner-puppy button {
+  position: absolute;
+  top: -12px;
+  right: -2px;
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--ink);
+  pointer-events: auto;
+}
+.corner-puppy button:hover { background: var(--soft); }
+@keyframes corner-puppy-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+/* The fixed illustration fits outside the 1120px content area only on wide screens. */
+@media (max-width: 1279px) {
+  .corner-puppy { position: relative; right: auto; bottom: auto; width: 54px; margin: 8px 16px 12px auto; }
+}
+@media (max-width: 540px) {
+  .corner-puppy { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .favorite-action__paws { display: none; }
+}
