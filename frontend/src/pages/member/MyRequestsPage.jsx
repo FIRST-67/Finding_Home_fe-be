@@ -5,11 +5,11 @@ import ErrorMessage from '../../components/ErrorMessage'
 import PawLoader from '../../components/PawLoader'
 import { cancelRequest, getMyRequests } from '../../services/requests'
 
-function statusLabel(status) {
-  if (status === 'approved') return 'อนุมัติแล้ว'
-  if (status === 'rejected') return 'ไม่อนุมัติ'
-  if (status === 'cancelled') return 'ยกเลิกแล้ว'
-  return 'รอพิจารณา'
+const STATUS_LABELS = {
+  pending: 'รอพิจารณา',
+  approved: 'อนุมัติแล้ว',
+  rejected: 'ไม่อนุมัติ',
+  cancelled: 'ยกเลิกแล้ว',
 }
 
 export default function MyRequestsPage() {
@@ -46,11 +46,25 @@ export default function MyRequestsPage() {
     }
   }
 
+  const counts = { pending: 0, approved: 0, rejected: 0, cancelled: 0 }
+  for (const { status } of requests) {
+    if (Object.hasOwn(counts, status)) counts[status] += 1
+  }
+
   return (
     <section>
       <h1>คำขอรับเลี้ยงของฉัน</h1>
       {loading && <PawLoader />}
       {!loading && error && <ErrorMessage message={error} onRetry={load} />}
+      {!loading && !error && (
+        <ul aria-label="สรุปสถานะคำขอ" className="my-4 flex list-none flex-wrap gap-2 p-0">
+          {Object.entries(STATUS_LABELS).map(([status, label]) => (
+            <li key={status} className={`request-status request-status--${status}`}>
+              {label} {counts[status]}
+            </li>
+          ))}
+        </ul>
+      )}
       {!loading && !error && !requests.length && (
         <EmptyState illustrated action={<Link className="button-link" to="/explore">เลือกดูน้องหมา</Link>}>
           ยังไม่มีคำขอรับเลี้ยง
@@ -65,7 +79,7 @@ export default function MyRequestsPage() {
                 <p>{request.message}</p>
               </div>
               <div>
-                <span className={`request-status request-status--${request.status}`}>{statusLabel(request.status)}</span>
+                <span className={`request-status request-status--${request.status}`}>{STATUS_LABELS[request.status] ?? STATUS_LABELS.pending}</span>
                 {request.status === 'pending' && (
                   <button type="button" disabled={cancellingId === request.id} onClick={() => cancel(request.id)}>
                     {cancellingId === request.id ? 'กำลังยกเลิก...' : 'ยกเลิกคำขอ'}
