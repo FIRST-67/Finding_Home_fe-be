@@ -1,3 +1,4 @@
+import { ClipboardList } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -69,6 +70,14 @@ export default function Navbar() {
         >
           <NavLink to="/" end>หน้าแรก</NavLink>
           <NavLink to="/explore">ค้นหาน้องหมา</NavLink>
+          {isAuthenticated && user?.role === 'member' && (
+            <NavLink to="/my-requests" end onClick={() => setMenuOpen(false)}>
+              <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+                <ClipboardList size={16} aria-hidden="true" />
+                คำขอของฉัน
+              </span>
+            </NavLink>
+          )}
           {isAuthenticated && user?.role === 'admin' && (
             <NavLink to="/admin">จัดการระบบ</NavLink>
           )}

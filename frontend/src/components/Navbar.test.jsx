@@ -1,12 +1,76 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import Navbar from './Navbar'
+import { useAuth } from '../context/AuthContext'
 
 jest.mock('../context/AuthContext', () => ({
-  useAuth: () => ({ isAuthenticated: false, user: null, logout: jest.fn() }),
+  useAuth: jest.fn(),
 }))
 
+const guest = { isAuthenticated: false, user: null }
+const member = { isAuthenticated: true, user: { role: 'member' } }
+
+function navbarAt(path = '/') {
+  return (
+    <MemoryRouter initialEntries={[path]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<h1>หน้าหลัก</h1>} />
+        <Route path="/my-requests" element={<h1>คำขอรับเลี้ยงของฉัน</h1>} />
+      </Routes>
+    </MemoryRouter>
+  )
+}
+
 describe('Navbar', () => {
+  beforeEach(() => useAuth.mockReturnValue(guest))
+
+  it.each([
+    [guest, false],
+    [member, true],
+    [{ isAuthenticated: true, user: { role: 'admin' } }, false],
+    [{ isAuthenticated: false, user: { role: 'member' } }, false],
+  ])('shows the requests link according to the current session (%#)', (session, visible) => {
+    useAuth.mockReturnValue(session)
+    render(navbarAt())
+    const link = screen.queryByRole('link', { name: 'คำขอของฉัน' })
+    if (visible) expect(link).toHaveAttribute('href', '/my-requests')
+    else expect(link).not.toBeInTheDocument()
+    if (session.user?.role === 'admin') {
+      expect(screen.getByRole('link', { name: 'จัดการระบบ' })).toHaveAttribute('href', '/admin')
+    }
+  })
+
+  it('navigates from the mobile menu, marks the link active, and closes the menu', () => {
+    useAuth.mockReturnValue(member)
+    render(navbarAt())
+    fireEvent.click(screen.getByRole('button', { name: 'เปิดเมนู' }))
+    const link = screen.getByRole('link', { name: 'คำขอของฉัน' })
+    expect(link).not.toHaveAttribute('aria-current')
+    fireEvent.click(link)
+    expect(screen.getByRole('heading', { name: 'คำขอรับเลี้ยงของฉัน' })).toBeVisible()
+    expect(link).toHaveAttribute('aria-current', 'page')
+    expect(link).toHaveClass('active')
+    expect(screen.getByRole('button', { name: 'เปิดเมนู' })).toHaveAttribute('aria-expanded', 'false')
+
+    fireEvent.click(screen.getByRole('button', { name: 'เปิดเมนู' }))
+    fireEvent.click(link)
+    expect(screen.getByRole('button', { name: 'เปิดเมนู' })).toHaveAttribute('aria-expanded', 'false')
+  })
+
+  it('removes the requests link when logout clears the session', () => {
+    const logout = jest.fn(() => useAuth.mockReturnValue(guest))
+    useAuth.mockReturnValue({ ...member, logout })
+    const view = render(navbarAt())
+
+    fireEvent.click(screen.getByRole('button', { name: 'ออกจากระบบ' }))
+    expect(logout).toHaveBeenCalledTimes(1)
+    view.rerender(navbarAt())
+
+    expect(screen.queryByRole('link', { name: 'คำขอของฉัน' })).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'เข้าสู่ระบบ' })).toBeInTheDocument()
+  })
+
   it('shows the back button before the brand and falls back home on dog details', () => {
     render(
       <MemoryRouter
