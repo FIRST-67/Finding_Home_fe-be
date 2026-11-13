@@ -19,7 +19,7 @@ describe('DogCard', () => {
       </MemoryRouter>,
     )
 
-    expect(container.querySelector('.dog-card__ears')).toHaveAttribute('aria-hidden', 'true')
+    expect(container.querySelector('.dog-card__peek')).toHaveAttribute('aria-hidden', 'true')
     expect(screen.getByRole('link', { name: 'ดูข้อมูลมะลิ' })).toHaveAttribute('href', '/dogs/1')
     expect(screen.getByRole('heading', { name: 'มะลิ' })).toBeInTheDocument()
     expect(screen.getByText('ไทยผสม')).toBeInTheDocument()

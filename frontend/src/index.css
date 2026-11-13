@@ -911,34 +911,23 @@ th, td { border-bottom-color: var(--beige); }
   }
 }
 
-/* Keep the ears outside the card without unclipping the photo itself. */
+/* Position the illustration above the photo without moving the card. */
 .dog-card { position: relative; overflow: visible; }
 .dog-card__photo { border-radius: inherit; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
-.dog-card__ears {
+.dog-card__peek {
   position: absolute;
+  z-index: 1;
   top: 0;
   left: 50%;
-  width: 68px;
-  height: 21px;
+  width: 66px;
   opacity: 0;
   pointer-events: none;
-  transform: translate(-50%, 0);
+  transform: translate(-50%, -35%);
   transition: transform 260ms ease, opacity 260ms ease;
 }
-.dog-card__ears::before, .dog-card__ears::after {
-  position: absolute;
-  width: 24px;
-  height: 24px;
-  border: 3px solid var(--button-color);
-  border-radius: 70% 60% 35% 35%;
-  background: var(--peach);
-  content: "";
-}
-.dog-card__ears::before { left: 0; transform: rotate(-24deg); }
-.dog-card__ears::after { right: 0; transform: rotate(24deg); }
-.dog-card:has(:focus-visible) .dog-card__ears { opacity: 1; transform: translate(-50%, -16px); }
+.dog-card:has(:focus-visible) .dog-card__peek { opacity: 1; transform: translate(-50%, -88%); }
 @media (hover: hover) and (pointer: fine) {
-  .dog-card:hover .dog-card__ears { opacity: 1; transform: translate(-50%, -16px); }
+  .dog-card:hover .dog-card__peek { opacity: 1; transform: translate(-50%, -88%); }
 }
 
 .favorite-action { position: relative; }
@@ -986,10 +975,25 @@ th, td { border-bottom-color: var(--beige); }
   right: 10px;
   bottom: 12px;
   z-index: 10;
-  width: 65px;
+  width: 116px;
   pointer-events: none;
   animation: corner-puppy-in 300ms ease-out;
 }
+.corner-puppy__link {
+  display: block;
+  border: 2px solid #e8a47e;
+  border-radius: 20px;
+  background: #70433f;
+  box-shadow: var(--shadow);
+  pointer-events: auto;
+}
+.corner-puppy__link svg { display: block; width: 100%; }
+.corner-puppy__open-eye { opacity: 0; }
+.corner-puppy__open-eye, .corner-puppy__closed-eye, .corner-puppy__zzz { transition: opacity 180ms ease; }
+.corner-puppy__link:is(:hover, :focus-visible) .corner-puppy__open-eye { opacity: 1; }
+.corner-puppy__link:is(:hover, :focus-visible) :is(.corner-puppy__closed-eye, .corner-puppy__zzz) { opacity: 0; }
+.corner-puppy__tail { transform-origin: 24px 50px; transition: transform 220ms ease; }
+.corner-puppy__link:is(:hover, :focus-visible) .corner-puppy__tail { transform: rotate(17deg); }
 .corner-puppy button {
   position: absolute;
   top: -12px;
@@ -1010,8 +1014,8 @@ th, td { border-bottom-color: var(--beige); }
   to { opacity: 1; transform: translateY(0); }
 }
 /* The fixed illustration fits outside the 1120px content area only on wide screens. */
-@media (max-width: 1279px) {
-  .corner-puppy { position: relative; right: auto; bottom: auto; width: 54px; margin: 8px 16px 12px auto; }
+@media (max-width: 1399px) {
+  .corner-puppy { position: relative; right: auto; bottom: auto; width: 92px; margin: 8px 16px 12px auto; }
 }
 @media (max-width: 540px) {
   .corner-puppy { display: none; }
