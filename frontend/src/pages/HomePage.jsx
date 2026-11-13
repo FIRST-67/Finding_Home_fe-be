@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Search } from 'lucide-react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import AdoptionSteps from '../components/AdoptionSteps'
 import DogCard from '../components/DogCard'
 import DogCardSkeletons from '../components/DogCardSkeletons'
@@ -21,22 +20,48 @@ function shuffle(dogs) {
   return shuffled
 }
 
+function FeaturedDogs({ dogs }) {
+  const sectionHeadingReveal = useReveal()
+
+  return (
+    <section>
+      <div
+        className={`section-heading reveal${sectionHeadingReveal.isRevealed ? ' is-revealed' : ''}`}
+        ref={sectionHeadingReveal.ref}
+      >
+        <div>
+          <p className="eyebrow">เพื่อนใหม่ของคุณ</p>
+          <h2>น้องหมาที่กำลังหาบ้าน</h2>
+        </div>
+        <Link to="/explore">ดูทั้งหมด <span aria-hidden="true">→</span></Link>
+      </div>
+      <div className="grid home-featured-grid">
+        {dogs.slice(0, 8).map((dog, index) => (
+          <DogCard key={dog.id} dog={dog} style={{ '--stagger-delay': `${index * 60}ms` }} />
+        ))}
+      </div>
+    </section>
+  )
+}
+
 export default function HomePage() {
   const [dogs, setDogs] = useState([])
   const [heroDogs, setHeroDogs] = useState([])
-  const [query, setQuery] = useState('')
-  const [gender, setGender] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const navigate = useNavigate()
-  const sectionHeadingReveal = useReveal()
 
   const load = useCallback(async () => {
     setLoading(true)
     setError('')
     try {
       const response = await getDogs({ status: 'available', limit: 50 })
-      const availableDogs = response.data.filter((dog) => dog.status === 'available')
+      const availableDogsById = new Map()
+      for (const dog of response.data) {
+        if (dog.status === 'available' && !availableDogsById.has(dog.id)) {
+          availableDogsById.set(dog.id, dog)
+        }
+      }
+      const availableDogs = [...availableDogsById.values()]
       setDogs(availableDogs)
       setHeroDogs(shuffle(availableDogs).slice(0, 6))
     } catch (loadError) {
@@ -51,17 +76,6 @@ export default function HomePage() {
   useEffect(() => {
     load()
   }, [load])
-
-  function handleSubmit(event) {
-    event.preventDefault()
-    const params = new URLSearchParams()
-    if (query.trim()) params.set('q', query.trim())
-    if (gender) params.set('sex', gender)
-    const search = params.toString()
-    navigate(`/explore${search ? `?${search}` : ''}`)
-  }
-
-  const breeds = [...new Set(dogs.map((dog) => dog.breed_name).filter(Boolean))]
 
   return (
     <div className="home-page">
@@ -89,69 +103,12 @@ export default function HomePage() {
         <HeroCarousel dogs={heroDogs} loading={loading} />
       </section>
 
-      <form className="search search--home" onSubmit={handleSubmit}>
-        <label className="search__field">
-          <Search size={20} aria-hidden="true" />
-          <input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="ค้นหาตามชื่อหรือสายพันธุ์"
-            aria-label="ค้นหาตามชื่อหรือสายพันธุ์"
-          />
-        </label>
-        <select
-          value={gender}
-          onChange={(event) => setGender(event.target.value)}
-          aria-label="เพศ"
-        >
-          <option value="">ทุกเพศ</option>
-          <option value="male">เพศผู้</option>
-          <option value="female">เพศเมีย</option>
-        </select>
-        <button type="submit">ค้นหา</button>
-      </form>
-
-      {breeds.length > 1 && (
-        <section className="breed-filter" aria-label="เลือกสายพันธุ์">
-          <span className="breed-filter__label">สายพันธุ์</span>
-          <div className="breed-filter__items">
-            {breeds.map((breed) => (
-              <Link
-                className="breed-filter__chip"
-                key={breed}
-                to={`/explore?breed=${encodeURIComponent(breed)}`}
-              >
-                {breed}
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
       {loading && <DogCardSkeletons />}
       {!loading && error && <ErrorMessage message={error} onRetry={load} />}
       {!loading && !error && dogs.length === 0 && (
         <EmptyState>ยังไม่มีน้องหมาที่พร้อมหาบ้านในขณะนี้</EmptyState>
       )}
-      {!loading && !error && dogs.length > 0 && (
-        <section className="dog-section">
-          <div
-            className={`section-heading reveal${sectionHeadingReveal.isRevealed ? ' is-revealed' : ''}`}
-            ref={sectionHeadingReveal.ref}
-          >
-            <div>
-              <p className="eyebrow">เพื่อนใหม่ของคุณ</p>
-              <h2>น้องหมาที่กำลังหาบ้าน</h2>
-            </div>
-            <Link to="/explore">ดูทั้งหมด <span aria-hidden="true">→</span></Link>
-          </div>
-          <div className="grid">
-            {dogs.slice(0, 4).map((dog, index) => (
-              <DogCard key={dog.id} dog={dog} style={{ '--stagger-delay': `${index * 60}ms` }} />
-            ))}
-          </div>
-        </section>
-      )}
+      {!loading && !error && dogs.length > 0 && <FeaturedDogs dogs={dogs} />}
 
       <AdoptionSteps />
     </div>

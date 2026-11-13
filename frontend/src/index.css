@@ -250,7 +250,7 @@ main.page-container {
   outline-offset: 3px;
 }
 
-.home-page { display: grid; gap: 34px; }
+.home-page { display: grid; gap: clamp(26px, 3vw, 32px); }
 .home-intro {
   position: relative;
   display: flex;
@@ -463,21 +463,7 @@ main.page-container {
 .button-link--secondary { border: 1px solid var(--beige); background: var(--surface); color: var(--brown); }
 .button-link--secondary:hover { background: var(--peach); color: var(--brown); }
 
-.search--home {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 150px auto;
-  align-items: center;
-  gap: 10px;
-  margin: 0 5%;
-  padding: 12px;
-  border: 1px solid var(--beige);
-  border-radius: 18px;
-  background: var(--surface);
-  box-shadow: var(--shadow);
-}
-.search__field { display: flex; align-items: center; gap: 10px; padding-left: 10px; color: var(--muted); }
-.search__field > svg { flex: 0 0 auto; }
-.search--home input, .search--home select, .explore-filters input, .explore-filters select {
+.explore-filters input, .explore-filters select {
   width: 100%;
   min-width: 0;
   min-height: 46px;
@@ -487,36 +473,7 @@ main.page-container {
   background: var(--surface);
   color: var(--brown);
 }
-.search--home select { padding: 0 12px; border-left: 1px solid var(--beige); }
-.search--home button { min-width: 112px; }
-.breed-filter { display: flex; align-items: center; gap: 16px; }
-.breed-filter__label { flex: 0 0 auto; color: var(--muted); font-size: .85rem; font-weight: 650; }
-.breed-filter__items { display: flex; flex-wrap: wrap; gap: 8px; }
-.breed-filter__chip {
-  display: inline-flex;
-  min-height: 38px;
-  align-items: center;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 7px 14px;
-  background: var(--surface);
-  color: var(--muted);
-  font-size: .85rem;
-  text-decoration: none;
-}
-.breed-filter__chip:hover { border-color: var(--accent); color: var(--accent); }
-.breed-filter button {
-  min-height: 38px;
-  border: 1px solid var(--beige);
-  border-radius: 999px;
-  padding: 7px 14px;
-  background: var(--surface);
-  color: var(--muted);
-  cursor: var(--cursor-clickable, pointer);
-}
-.breed-filter button.is-selected { border-color: var(--button-color); background: var(--button-color); color: var(--surface); }
 
-.dog-section { margin-top: 6px; }
 .section-heading { margin: 0 0 18px; }
 .section-heading h1, .section-heading h2, .page-intro h1, section > h1 {
   margin: 5px 0 0;
@@ -558,6 +515,7 @@ main.page-container {
 .adoption-step h3 { margin: 17px 0 8px; color: var(--ink); font-size: 1rem; }
 .adoption-step p { margin: 0; color: var(--muted); line-height: 1.65; }
 .grid { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 18px; margin-top: 0; }
+.grid.home-featured-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .dog-card {
   border: 1px solid var(--beige);
   border-radius: 20px;
@@ -762,6 +720,10 @@ main.page-container {
 th { background: var(--peach); color: var(--brown); }
 th, td { border-bottom-color: var(--beige); }
 
+@media (max-width: 1023px) {
+  .grid.home-featured-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 @media (max-width: 760px) {
   .site-header {
     padding-inline: 20px;
@@ -819,12 +781,10 @@ th, td { border-bottom-color: var(--beige); }
     text-align: center;
   }
   main.page-container { min-height: calc(100vh - 72px); padding: 24px 20px 52px; }
-  .home-page { gap: 26px; }
   .home-intro { min-height: 270px; padding: 30px 24px; border-radius: 24px; }
   .home-intro h1 { font-size: clamp(2rem, 8vw, 3rem); }
   .hero-carousel, .home-intro__skeleton { width: 32%; }
   .home-intro__photo { width: 100%; height: auto; border-radius: 100px 100px 20px 20px; }
-  .search--home { margin: 0 3%; }
   .dog-detail { grid-template-columns: 1fr; gap: 18px; }
   .dog-detail > img, .dog-detail > .dog-image-placeholder { position: static; min-height: 300px; max-height: 440px; }
   .dog-detail__body { padding: 0; }
@@ -833,6 +793,7 @@ th, td { border-bottom-color: var(--beige); }
 }
 
 @media (max-width: 540px) {
+  .grid.home-featured-grid { grid-template-columns: minmax(0, 1fr); }
   .site-header { padding-inline: 14px; }
   .site-header__start { gap: 7px; }
   .nav-back { padding: 7px 8px; font-size: .7rem; }
@@ -865,15 +826,6 @@ th, td { border-bottom-color: var(--beige); }
   .hero-carousel__dot { width: 6px; height: 6px; }
   .hero-carousel__dot.is-active { width: 14px; }
   .hero-carousel__play { min-height: 21px; padding: 2px 6px; font-size: .6rem; }
-  .search--home { grid-template-columns: minmax(0, 1fr) 95px; gap: 6px; margin: 0 2%; padding: 8px; }
-  .search__field { gap: 5px; padding-left: 5px; }
-  .search__field > span { font-size: 1.25rem; }
-  .search--home input, .search--home select { font-size: .8rem; }
-  .search--home select { grid-column: 1 / 2; grid-row: 2; min-height: 38px; border: 0; border-top: 1px solid var(--beige); }
-  .search--home button { grid-column: 2; grid-row: 1 / 3; min-width: 0; min-height: 42px; padding: 8px; font-size: .82rem; }
-  .breed-filter { align-items: flex-start; flex-direction: column; gap: 9px; }
-  .breed-filter__items { flex-wrap: nowrap; max-width: calc(100vw - 28px); overflow-x: auto; padding-bottom: 4px; }
-  .breed-filter button { flex: 0 0 auto; font-size: .78rem; }
   .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px; }
   .dog-card { border-radius: 16px; }
   .dog-card__content { padding: 11px 11px 13px; }

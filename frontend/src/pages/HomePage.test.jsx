@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
-import { MemoryRouter, useLocation } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { afterEach, vi } from 'vitest'
 import HomePage from './HomePage'
 import { getDogs } from '../services/dogs'
@@ -14,16 +14,13 @@ const availableDogs = [
   { id: 5, name: 'ลัคกี้', breed_name: 'บีเกิล', age_years: 2, status: 'available' },
 ]
 
-function LocationDisplay() {
-  const location = useLocation()
-  return <output aria-label="current search">{location.search}</output>
-}
-
 function renderHome() {
   return render(
     <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <HomePage />
-      <LocationDisplay />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/explore" element={<h1>Explore</h1>} />
+      </Routes>
     </MemoryRouter>,
   )
 }
@@ -36,7 +33,7 @@ describe('HomePage', () => {
 
   afterEach(() => vi.restoreAllMocks())
 
-  it('shows loading and then dog listings, hero, adoption steps, and only four cards', async () => {
+  it('shows loading and then dog listings, hero, adoption steps, and all five available dog cards', async () => {
     let resolveDogs
     getDogs.mockReturnValue(new Promise((resolve) => { resolveDogs = resolve }))
     renderHome()
@@ -48,11 +45,28 @@ describe('HomePage', () => {
     const heroLink = screen.getAllByRole('link', { name: 'ดูข้อมูลมะลิ' })[0]
     expect(within(heroLink).getByRole('img', { name: 'มะลิ สุนัข ไทยผสม' })).toBeInTheDocument()
     expect(within(heroLink).getByText('พร้อมหาบ้าน')).toBeInTheDocument()
-    expect(screen.getAllByRole('article')).toHaveLength(8)
+    const featuredSection = screen.getByRole('heading', { name: 'น้องหมาที่กำลังหาบ้าน' }).closest('section')
+    expect(within(featuredSection).getAllByRole('article')).toHaveLength(5)
     expect(screen.getByRole('heading', { name: 'ขั้นตอนการรับเลี้ยง' })).toBeInTheDocument()
     expect(screen.getByText('ง่าย ๆ ใน 4 ขั้นตอน')).toBeInTheDocument()
     expect(screen.getByText('นัดวันรับและติดตามผลหลังรับเลี้ยง')).toBeInTheDocument()
     expect(getDogs).toHaveBeenCalledWith({ status: 'available', limit: 50 })
+  })
+
+  it('shows at most eight unique available dogs with their own detail links', async () => {
+    const dogs = [...availableDogs, ...availableDogs.slice(0, 4).map((dog) => ({
+      ...dog, id: dog.id + 5,
+    }))]
+    getDogs.mockResolvedValue({
+      data: [{ ...dogs[0], id: 10, status: 'adopted' }, dogs[0], ...dogs],
+    })
+    renderHome()
+
+    const heading = await screen.findByRole('heading', { name: 'น้องหมาที่กำลังหาบ้าน' })
+    const cards = within(heading.closest('section')).getAllByRole('article')
+    expect(cards.map((card) => within(card).getByRole('link').getAttribute('href'))).toEqual(
+      dogs.slice(0, 8).map((dog) => `/dogs/${dog.id}`),
+    )
   })
 
   it('shows empty state when there are no available dogs', async () => {
@@ -82,38 +96,24 @@ describe('HomePage', () => {
     await waitFor(() => expect(getDogs).toHaveBeenCalledTimes(2))
   })
 
-  it('navigates to Explore with search text and selected sex', async () => {
+  it('omits search, sex filtering, and breed chips when multiple breeds are available', async () => {
     getDogs.mockResolvedValue({ data: availableDogs })
     renderHome()
 
     await screen.findByRole('heading', { name: 'มะลิ' })
-    fireEvent.change(screen.getByLabelText('ค้นหาตามชื่อหรือสายพันธุ์'), { target: { value: 'ไทยผสม' } })
-    fireEvent.change(screen.getByLabelText('เพศ'), { target: { value: 'female' } })
-    fireEvent.submit(screen.getByRole('button', { name: 'ค้นหา' }).closest('form'))
-
-    const searchParams = new URLSearchParams(screen.getByLabelText('current search').textContent)
-    expect(searchParams.get('q')).toBe('ไทยผสม')
-    expect(searchParams.get('sex')).toBe('female')
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
+    expect(screen.queryByRole('combobox', { name: 'เพศ' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: 'เลือกสายพันธุ์' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'บีเกิล' })).not.toBeInTheDocument()
   })
 
-  it('links breed chips using data breeds and hides chips when there is one breed', async () => {
+  it.each(['ค้นหาน้องหมา', 'ดูทั้งหมด'])('opens Explore from the %s link', async (label) => {
     getDogs.mockResolvedValue({ data: availableDogs })
-    const { container } = renderHome()
+    renderHome()
 
-    await screen.findByRole('heading', { name: 'มะลิ' })
-    const thaiMixLink = screen.getByRole('link', { name: 'ไทยผสม' })
-    const beagleLink = screen.getByRole('link', { name: 'บีเกิล' })
-    expect(new URL(thaiMixLink.href).searchParams.get('breed')).toBe('ไทยผสม')
-    expect(new URL(beagleLink.href).searchParams.get('breed')).toBe('บีเกิล')
-
-    getDogs.mockResolvedValueOnce({ data: [availableDogs[0]] })
-    const singleBreedView = render(
-      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-        <HomePage />
-      </MemoryRouter>,
-    )
-    expect(await within(singleBreedView.container).findByRole('heading', { name: 'มะลิ' })).toBeInTheDocument()
-    expect(within(singleBreedView.container).queryByRole('region', { name: 'เลือกสายพันธุ์' })).not.toBeInTheDocument()
-    expect(container).toBeInTheDocument()
+    const link = await screen.findByRole('link', { name: label })
+    expect(link).toHaveAttribute('href', '/explore')
+    fireEvent.click(link)
+    expect(await screen.findByRole('heading', { name: 'Explore' })).toBeInTheDocument()
   })
 })
