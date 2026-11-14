@@ -555,6 +555,7 @@ main.page-container {
 }
 .dog-card__favorite.is-favorite { color: var(--terracotta); }
 .dog-card__favorite:disabled { opacity: .65; cursor: wait; }
+.favorite-action-error { margin: 0; color: var(--warn); font-size: .9rem; }
 .dog-card__status {
   display: inline-flex;
   align-items: center;

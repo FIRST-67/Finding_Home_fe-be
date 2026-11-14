@@ -7,6 +7,7 @@ import EmptyState from '../components/EmptyState'
 import ErrorMessage from '../components/ErrorMessage'
 import HeroCarousel from '../components/HeroCarousel'
 import useReveal from '../hooks/useReveal'
+import useDogFavorites from '../hooks/useDogFavorites'
 import { getDogs } from '../services/dogs'
 
 function shuffle(dogs) {
@@ -22,6 +23,7 @@ function shuffle(dogs) {
 
 function FeaturedDogs({ dogs }) {
   const sectionHeadingReveal = useReveal()
+  const favorites = useDogFavorites()
 
   return (
     <section>
@@ -35,9 +37,17 @@ function FeaturedDogs({ dogs }) {
         </div>
         <Link to="/explore">ดูทั้งหมด <span aria-hidden="true">→</span></Link>
       </div>
+      {favorites.error && <p className="favorite-action-error" role="alert">{favorites.error}</p>}
       <div className="grid home-featured-grid grid-cols-1 min-[541px]:grid-cols-2 min-[1024px]:grid-cols-4">
         {dogs.slice(0, 8).map((dog, index) => (
-          <DogCard key={dog.id} dog={dog} style={{ '--stagger-delay': `${index * 60}ms` }} />
+          <DogCard
+            key={dog.id}
+            dog={dog}
+            isFavorite={favorites.favoriteIds.has(String(dog.id))}
+            onFavoriteToggle={favorites.canFavorite ? favorites.toggleFavorite : undefined}
+            removing={favorites.savingIds.has(String(dog.id))}
+            style={{ '--stagger-delay': `${index * 60}ms` }}
+          />
         ))}
       </div>
     </section>
@@ -105,6 +115,7 @@ export default function HomePage() {
 
       {loading && <DogCardSkeletons />}
       {!loading && error && <ErrorMessage message={error} onRetry={load} />}
+      {favorites.error && <p className="favorite-action-error" role="alert">{favorites.error}</p>}
       {!loading && !error && dogs.length === 0 && (
         <EmptyState>ยังไม่มีน้องหมาที่พร้อมหาบ้านในขณะนี้</EmptyState>
       )}

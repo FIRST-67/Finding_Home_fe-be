@@ -71,12 +71,17 @@ export default function Navbar() {
           <NavLink to="/" end>หน้าแรก</NavLink>
           <NavLink to="/explore">ค้นหาน้องหมา</NavLink>
           {isAuthenticated && user?.role === 'member' && (
-            <NavLink to="/my-requests" end onClick={() => setMenuOpen(false)}>
+            <>
+              <NavLink to="/favorites" onClick={() => setMenuOpen(false)}>
+                รายการโปรด
+              </NavLink>
+              <NavLink to="/my-requests" end onClick={() => setMenuOpen(false)}>
               <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
                 <ClipboardList size={16} aria-hidden="true" />
                 คำขอของฉัน
               </span>
-            </NavLink>
+              </NavLink>
+            </>
           )}
           {isAuthenticated && user?.role === 'admin' && (
             <NavLink to="/admin">จัดการระบบ</NavLink>

@@ -2,8 +2,17 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import HomePage from './HomePage'
 import { getDogs } from '../services/dogs'
+import { addFavorite, getFavorites } from '../services/favorites'
 
 jest.mock('../services/dogs', () => ({ getDogs: jest.fn() }))
+jest.mock('../services/favorites', () => ({
+  addFavorite: jest.fn(),
+  getFavorites: jest.fn(),
+  removeFavorite: vi.fn(),
+}))
+jest.mock('../context/AuthContext', () => ({
+  useAuth: () => ({ isAuthenticated: true, user: { role: 'member' } }),
+}))
 
 const availableDogs = [
   { id: 1, name: 'มะลิ', breed_name: 'ไทยผสม', age_years: 2, status: 'available' },
@@ -27,7 +36,21 @@ function renderHome() {
 describe('HomePage', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    getFavorites.mockResolvedValue([])
     jest.spyOn(Math, 'random').mockReturnValue(0.99)
+  })
+
+  it('adds a dog to favorites from its card', async () => {
+    getDogs.mockResolvedValue({ data: availableDogs })
+    addFavorite.mockResolvedValue(null)
+    renderHome()
+
+    await screen.findByRole('heading', { name: 'มะลิ' })
+    const favoriteButton = screen.getByRole('button', { name: 'เพิ่มมะลิในรายการโปรด' })
+    fireEvent.click(favoriteButton)
+
+    await waitFor(() => expect(addFavorite).toHaveBeenCalledWith(expect.any(Number)))
+    expect(favoriteButton).toHaveAttribute('aria-pressed', 'true')
   })
 
   afterEach(() => jest.restoreAllMocks())

@@ -1,13 +1,23 @@
-import { fireEvent, render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import ExplorePage from './ExplorePage'
 import { getDogs } from '../services/dogs'
+import { getFavorites, removeFavorite } from '../services/favorites'
 
 jest.mock('../services/dogs', () => ({ getDogs: jest.fn() }))
+jest.mock('../services/favorites', () => ({
+  addFavorite: jest.fn(),
+  getFavorites: jest.fn(),
+  removeFavorite: jest.fn(),
+}))
+jest.mock('../context/AuthContext', () => ({
+  useAuth: () => ({ isAuthenticated: true, user: { role: 'member' } }),
+}))
 
 describe('ExplorePage', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    getFavorites.mockResolvedValue([])
     getDogs.mockResolvedValue({
       data: [
         { id: 1, name: 'มะลิ', breed_name: 'ไทยผสม', age_years: 2, gender: 'female', location: 'เชียงใหม่', status: 'available' },
@@ -79,5 +89,25 @@ describe('ExplorePage', () => {
     expect(screen.getByLabelText('ค้นหาชื่อหรือสายพันธุ์')).toHaveValue('มะลิ')
     expect(screen.getByLabelText('สายพันธุ์')).toHaveValue('ไทยผสม')
     expect(screen.getByLabelText('เพศ')).toHaveValue('female')
+  })
+
+  it('loads saved favorites and removes them from a dog card', async () => {
+    getFavorites.mockResolvedValue([{ id: 1 }])
+    removeFavorite.mockResolvedValue(null)
+
+    render(
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <ExplorePage />
+      </MemoryRouter>,
+    )
+
+    const favoriteButton = await screen.findByRole('button', { name: 'นำมะลิออกจากรายการโปรด' })
+    expect(favoriteButton).toHaveAttribute('aria-pressed', 'true')
+    fireEvent.click(favoriteButton)
+
+    await waitFor(() => {
+      expect(removeFavorite).toHaveBeenCalledWith(1)
+      expect(screen.getByRole('button', { name: 'เพิ่มมะลิในรายการโปรด' })).toHaveAttribute('aria-pressed', 'false')
+    })
   })
 })

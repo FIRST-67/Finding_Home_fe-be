@@ -17,6 +17,7 @@ function navbarAt(path = '/') {
       <Routes>
         <Route path="/" element={<h1>หน้าหลัก</h1>} />
         <Route path="/my-requests" element={<h1>คำขอรับเลี้ยงของฉัน</h1>} />
+        <Route path="/favorites" element={<h1>รายการโปรด</h1>} />
       </Routes>
     </MemoryRouter>
   )
@@ -36,6 +37,9 @@ describe('Navbar', () => {
     const link = screen.queryByRole('link', { name: 'คำขอของฉัน' })
     if (visible) expect(link).toHaveAttribute('href', '/my-requests')
     else expect(link).not.toBeInTheDocument()
+    const favoritesLink = screen.queryByRole('link', { name: 'รายการโปรด' })
+    if (visible) expect(favoritesLink).toHaveAttribute('href', '/favorites')
+    else expect(favoritesLink).not.toBeInTheDocument()
     if (session.user?.role === 'admin') {
       expect(screen.getByRole('link', { name: 'จัดการระบบ' })).toHaveAttribute('href', '/admin')
     }
@@ -193,4 +197,5 @@ describe('Navbar', () => {
     expect(document.documentElement).toHaveAttribute('data-theme', 'dark')
     expect(localStorage.getItem('finding-home-theme')).toBe('dark')
   })
+
 })

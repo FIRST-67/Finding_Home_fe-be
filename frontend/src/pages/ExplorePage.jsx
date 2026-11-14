@@ -6,6 +6,7 @@ import DogCardSkeletons from '../components/DogCardSkeletons'
 import EmptyState from '../components/EmptyState'
 import ErrorMessage from '../components/ErrorMessage'
 import useReveal from '../hooks/useReveal'
+import useDogFavorites from '../hooks/useDogFavorites'
 import { getDogs } from '../services/dogs'
 
 const EMPTY_FILTERS = { q: '', breed: '', age: '', size: '', gender: '', location: '' }
@@ -30,6 +31,7 @@ export default function ExplorePage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const resultsHeadingReveal = useReveal()
+  const favorites = useDogFavorites()
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -133,6 +135,7 @@ export default function ExplorePage() {
       </div>
       {loading && <DogCardSkeletons count={8} loader={<PawLoader compact>กำลังตามหาน้องหมา...</PawLoader>} />}
       {!loading && error && <ErrorMessage message={error} onRetry={load} />}
+      {favorites.error && <p className="favorite-action-error" role="alert">{favorites.error}</p>}
       {!loading && !error && filteredDogs.length === 0 && (
         <EmptyState illustrated action={Object.values(filters).some(Boolean) && (
           <button type="button" onClick={() => setFilters(EMPTY_FILTERS)}>ล้างตัวกรอง</button>
@@ -143,7 +146,14 @@ export default function ExplorePage() {
       {!loading && !error && filteredDogs.length > 0 && (
         <div className="grid" role="region" aria-label="dog results">
           {filteredDogs.map((dog, index) => (
-            <DogCard key={dog.id} dog={dog} style={{ '--stagger-delay': `${index * 60}ms` }} />
+            <DogCard
+              key={dog.id}
+              dog={dog}
+              isFavorite={favorites.favoriteIds.has(String(dog.id))}
+              onFavoriteToggle={favorites.canFavorite ? favorites.toggleFavorite : undefined}
+              removing={favorites.savingIds.has(String(dog.id))}
+              style={{ '--stagger-delay': `${index * 60}ms` }}
+            />
           ))}
         </div>
       )}
