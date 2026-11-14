@@ -8,7 +8,7 @@ jest.mock('../services/dogs', () => ({ getDogs: jest.fn() }))
 jest.mock('../services/favorites', () => ({
   addFavorite: jest.fn(),
   getFavorites: jest.fn(),
-  removeFavorite: vi.fn(),
+  removeFavorite: jest.fn(),
 }))
 jest.mock('../context/AuthContext', () => ({
   useAuth: () => ({ isAuthenticated: true, user: { role: 'member' } }),

@@ -115,7 +115,6 @@ export default function HomePage() {
 
       {loading && <DogCardSkeletons />}
       {!loading && error && <ErrorMessage message={error} onRetry={load} />}
-      {favorites.error && <p className="favorite-action-error" role="alert">{favorites.error}</p>}
       {!loading && !error && dogs.length === 0 && (
         <EmptyState>ยังไม่มีน้องหมาที่พร้อมหาบ้านในขณะนี้</EmptyState>
       )}
